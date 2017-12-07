@@ -10,7 +10,7 @@
   
   <title>
     
-      用NSScanner判断String内容是否为整型或者浮点型数据 | cocoa_chen
+      Remote Notification | cocoa_chen
     
   </title>
   <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -112,8 +112,8 @@
 </header>
 
     <div id="article-banner">
-  <h2>用NSScanner判断String内容是否为整型或者浮点型数据</h2>
-  <p class="post-date">2014-10-27</p>
+  <h2>Remote Notification</h2>
+  <p class="post-date">2017-08-01</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -121,13 +121,32 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><a id="more"></a>
-<p>在开发的过程中会遇到各种各样的需求,比如需要判断一个NSString的变量内容是否为Int数据或者Float数据,这时候可以用NSScanner来简单的判断下.</p>
-<h3 id="1-判断NSString是否为int内容"><a href="#1-判断NSString是否为int内容" class="headerlink" title="1.判断NSString是否为int内容"></a>1.判断NSString是否为int内容</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">- (BOOL)isPureInt:(NSString *)string&#123;</span><br><span class="line">    if (!string) &#123;</span><br><span class="line">        return NO;</span><br><span class="line">    &#125;</span><br><span class="line">    NSScanner *_scanner = [NSScanner scannerWithString:string];</span><br><span class="line">    int val;</span><br><span class="line">    return [_scanner scanInt:&amp;val] &amp;&amp; [_scanner isAtEnd];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>调用测试如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">NSString *pureIntString = @&quot;123&quot;;</span><br><span class="line">NSString *noPureIntString = @&quot;123ab&quot;;</span><br><span class="line">BOOL isPure1 = [self isPureInt:pureIntString];</span><br><span class="line">NSLog(@&quot;&apos;%@&apos;字符串%@int内容的字符串&quot;,pureIntString,isPure1 ? @&quot;是&quot; : @&quot;不是&quot;);</span><br><span class="line">BOOL isPure2 = [self isPureInt:noPureIntString];</span><br><span class="line">NSLog(@&quot;&apos;%@&apos;字符串%@int内容的字符串&quot;,noPureIntString,isPure2 ? @&quot;是&quot; : @&quot;不是&quot;);</span><br></pre></td></tr></table></figure></p>
-<h3 id="2-判断NSString是否为float内容"><a href="#2-判断NSString是否为float内容" class="headerlink" title="2.判断NSString是否为float内容"></a>2.判断NSString是否为float内容</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">- (BOOL)isPureFloat:(NSString *)string&#123;</span><br><span class="line">    if (!string) &#123;</span><br><span class="line">        return NO;</span><br><span class="line">    &#125;</span><br><span class="line">    NSScanner* scan = [NSScanner scannerWithString:string];</span><br><span class="line">    float val;</span><br><span class="line">    return [scan scanFloat:&amp;val] &amp;&amp; [scan isAtEnd];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>调用测试如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">NSString *pureFloatString = @&quot;1.23&quot;;</span><br><span class="line">NSString *nopureFloatString = @&quot;1.23a&quot;;</span><br><span class="line">BOOL isPure1 = [self isPureFloat:pureFloatString];</span><br><span class="line">NSLog(@&quot;&apos;%@&apos;字符串%@float内容的字符串&quot;,pureFloatString,isPure1 ? @&quot;是&quot; : @&quot;不是&quot;);</span><br><span class="line">BOOL isPure2 = [self isPureFloat:nopureFloatString];</span><br><span class="line">NSLog(@&quot;&apos;%@&apos;字符串%@float内容的字符串&quot;,nopureFloatString,isPure2 ? @&quot;是&quot; : @&quot;不是&quot;);</span><br></pre></td></tr></table></figure></p>
-<p>NSScanner还提供其他的API来检测对应的数据类型，遇到对应的需求大家可以尝试使用一下！</p>
+    <section class="markdown-content"><p>本内容是静默推送的技术调研内容以及相关的应用场景讨论</p>
+<h2 id="项目配置"><a href="#项目配置" class="headerlink" title="项目配置"></a>项目配置</h2><p>在Xcode的项目配置中切换到<code>Capablities</code>选项,打开<code>PushNotifications</code>开关来允许推送,打开<code>Background Modes</code>开关并勾选<code>Remote notifications</code>来支持静默推送功能,同时勾选<code>Location updates</code>来允许后台读取位置信息。</p>
+<p>在AppDelegate中实现<code>application:didReceiveRemoteNotification:fetchCompletionHandler:</code>方法，如果同时也实现了<code>application:didReceiveRemoteNotification:</code>方法的话，当Remote Notification到来时，该方法不会执行，而是会调用<code>application:didReceiveRemoteNotification:fetchCompletionHandler:</code>，所以可能需要将<code>application:didReceiveRemoteNotification:</code>方法的代码逻辑迁移过去。</p>
+<h2 id="Payload设置"><a href="#Payload设置" class="headerlink" title="Payload设置"></a>Payload设置</h2><p>推送的Payload的aps字段中可包含<code>alert</code>、<code>badge</code>、<code>sound</code>以及<code>content-available</code>字段信息。其中<code>content-available</code>是静默推送的关键字段，将该值设置为<code>1</code>即可启用静默推送，禁用的话只需从Payload中移除该字段。如果想达到不提示用户的目的，将<code>alert</code>、<code>badge</code>和<code>sound</code>字段删掉即可，同时添加自定义的key。如<code>{&quot;aps&quot;:{&quot;content-available&quot;:1,&quot;type&quot;:&quot;0&quot;}}</code>就是个简单的静默推送的Payload，且不会在界面上有什么提示。</p>
+<h2 id="Details"><a href="#Details" class="headerlink" title="Details"></a>Details</h2><p>以下是Payload包含<code>content-available</code>字段且为<code>1</code>时的情况(不打扰用户删掉<code>alert</code>,<code>sound</code>,<code>badge</code>字段)</p>
+<ul>
+<li>当App在前台(Foreground)状态时，该状态可执行代码，会直接调用<code>application:didReceiveRemoteNotification:fetchCompletionHandler:</code>，可从<code>userInfo</code>字段中读取出Payload信息</li>
+<li>当App在后台(Background)状态时,该状态可执行代码，会调用<code>application:didReceiveRemoteNotification:fetchCompletionHandler:</code>方法</li>
+<li>当App在挂起(Suspended)状态时，该状态不会执行代码。当收到静默推送时，系统会自动启用App将状态切换到<code>Background</code>，并开始调用<code>application:didReceiveRemoteNotification:fetchCompletionHandler:</code>方法</li>
+<li>当App在杀死(Not Running)状态时，即用户双击Home键并强制杀死App，收到静默推送时，系统并不会执行任何回调。在这种情况下，用户需要<code>重新打开App</code>或者<code>重启手机</code>来让系统在下次接收到静默推送时能成功唤起App。</li>
+</ul>
+<p>当处理完<code>Remote Notification</code>的逻辑时，需要及时调用<code>application:didReceiveRemoteNotification:fetchCompletionHandler:</code>方法的<code>completionHandler</code>来标识是否有新数据或者失败了(如获取到新数据的代码为<code>completionHandler(UIBackgroundFetchResultNewData)</code>),否则系统就会终止App。App有最多<code>30秒</code>的时间来处理推送并且调用<code>completionHandler</code>，最好是在处理完推送内容时就及时调用handler代码块。同时系统会跟踪App在处理推送的后台任务中所消耗的<code>运行时间(elapsed time)</code>,<code>电量消耗(power usage)</code>和<code>数据成本(data costs)</code>，如果App在处理<code>Remote Notifications</code>中消耗了大量的电量，那么在收到静默推送时系统可能不会永远都及时唤醒App来响应事件。当推送频率超过一定限制后，Apple会将带有content-available标志的推送阻塞，以保证用户设备不被频繁唤醒。按照Apple的说法，这个频率在一小时内个位数次的推送的话不会有太大问题。</p>
+<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><p>网络请求:可正常执行，超时时间至多30秒，用NSURLSession代码实测有效</p>
+<p>位置访问:需要在<code>Capablities</code>中的<code>Background Modes</code>勾选<code>Location updates</code>，同时位置服务是可用的，可用<code>[CLLocationManager locationServicesEnabled]</code>判断，并且iOS8之后需要有位置的kCLAuthorizationStatusAuthorizedAlways访问权限，以确保应用在后台也可以访问位置信息。如果用户禁用了手机或者App的<code>后台应用刷新</code>，也并不能在后台获取到位置。因为在iOS9之后的<code>allowsBackgroundLocationUpdates</code>字段默认为NO,所以也需要在调用<code>startUpdatingLocation</code>时将<code>allowsBackgroundLocationUpdates</code>置为YES。位置访问最长时间也是30秒。</p>
+<p>TTS:代码测试前后台皆可播放。当在后台播放时需要在<code>Capablities</code>中的<code>Background Modes</code>勾选<code>Audio,AirPlay,and Picture inPicture</code>选项，当勾选该选项时，需要在App审核时填写该后台播放场景的入口，否则会被Apple审核人员禁止通过。当不勾选语音后台播放选项时，前台可正常播放，后台时会出现不能唤醒播放的问题</p>
+<p>音频播放:代码测试前后台都可播放，当在后台播放时需要在<code>Capablities</code>中的<code>Background Modes</code>勾选<code>Audio,AirPlay,and Picture inPicture</code>选项，而且需要在App审核时填写该后台场景的入口，否则Apple审核人员可能会禁止审核通过。</p>
+<p>本地推送弹窗:可以执行,代码测试可正常显示弹窗。</p>
+<h2 id="备注"><a href="#备注" class="headerlink" title="备注"></a>备注</h2><p>当用户禁用手机的<code>后台应用刷新</code>功能或者禁用App的<code>后台应用刷新</code>时，并不会收到<code>Remote Notification</code>，故相关代码逻辑也不会执行。可在代码中调用<code>[UIApplication sharedApplication].backgroundRefreshStatus</code>来获取当前App的后台刷新状态，如果该值为<code>UIBackgroundRefreshStatusAvailable</code>时可正常收到<code>Remote Notification</code>，否则会收不到推送内容。在iPhone上，如果手机进入低电量模式，<code>后台应用刷新</code>会自动停用，且无法手动打开，只能通过将设置-&gt;电池-&gt;低电量模式关闭才可让系统自动恢复上次<code>后台应用刷新</code>状态。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>在Payload的aps字段中添加<code>content-available</code>并设置为<code>1</code>可启用静默推送</li>
+<li>用户强制杀死App时(双击Home键关闭)，系统不会唤醒App，需要用户重新打开App或者重启手机</li>
+<li>当系统或者App的<code>后台应用刷新</code>功能被禁用时，收到静默推送时App也不会被唤醒并接收到回调。当手机进入低电量模式时，系统会自动禁用<code>后台应用刷新</code>功能</li>
+<li>静默推送唤醒App后，在后台的最长处理时间为<code>30秒</code>，所以需要及时调用<code>completionHandler</code>来告诉系统处理的结果</li>
+<li>后台访问位置服务时需要授权kCLAuthorizationStatusAuthorizedAlways使用权限以确保后台也可访问位置,如果此时App处于后台，系统会弹窗提示用户授权。iOS9之后在调用<code>startUpdatingLocation</code>时将<code>allowsBackgroundLocationUpdates</code>置为YES</li>
+<li>当需要在后台播放音频或者TTS时，需要在<code>Capablities</code>中的<code>Background Modes</code>勾选<code>Audio,AirPlay,and Picture inPicture</code>选项，并且在App审核内容处填写后台播放的场景入口以便Apple审核人员复现，否则可能会被拒绝App新版本通过</li>
+</ul>
 </section>
     <!-- Tags START -->
     
@@ -181,7 +200,7 @@
 
 <script>
   (function () {
-    var url = 'http://yoursite.com/2014/10/27/yong-nsscannerpan-duan-stringnei-rong-shi-fou-wei-zheng-xing-huo-zhe-fu-dian-xing-shu-ju/';
+    var url = 'http://yoursite.com/2017/08/01/Remote Notification/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -237,7 +256,7 @@
     var gitmentConfig = "cocoa-chen";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "用NSScanner判断String内容是否为整型或者浮点型数据",
+        id: "Remote Notification",
         owner: "cocoa-chen",
         repo: "cocoa_chen.github.io",
         oauth: {
