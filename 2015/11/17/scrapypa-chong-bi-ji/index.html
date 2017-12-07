@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="cocoa_chen&#39;s blog">
+  <meta name="keyword" content="objective-C, cocoa_chen, Swift">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      Scrapy爬虫笔记 | cocoa_chen
+    
+  </title>
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+  <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+  <script src="/js/qrious.js"></script>
+<script src="/js/gitment.js"></script>
+</head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>cocoa_chen</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>Scrapy爬虫笔记</h2>
+  <p class="post-date">2015-11-17</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><p>Scrapy是一个优秀的Python爬虫框架，可以很方便的爬取web站点的信息供我们分析和挖掘，在这记录下最近使用的一些心得。<br><a id="more"></a></p>
+<h3 id="1-安装"><a href="#1-安装" class="headerlink" title="1.安装"></a>1.安装</h3><p>通过pip或者easy_install安装:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo pip install scrapy</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-创建爬虫项目"><a href="#2-创建爬虫项目" class="headerlink" title="2.创建爬虫项目"></a>2.创建爬虫项目</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scrapy startproject youProjectName</span><br></pre></td></tr></table></figure>
+<h3 id="3-抓取数据"><a href="#3-抓取数据" class="headerlink" title="3.抓取数据"></a>3.抓取数据</h3><p>首先在items.py里定义要抓取的内容,以豆瓣美女为例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">from scrapy.item import Field,Item</span><br><span class="line"></span><br><span class="line">class DoubanmeinvItem(Item):</span><br><span class="line">    feedId = Field()         #feedId</span><br><span class="line">    userId = Field()         #用户id</span><br><span class="line">    createOn = Field()       #创建时间</span><br><span class="line">    title = Field()          #feedTitle</span><br><span class="line">    thumbUrl = Field()       #feed缩略图url</span><br><span class="line">    href = Field()           #feed链接</span><br><span class="line">    description = Field()    #feed简介</span><br><span class="line">    pics = Field()           #feed的图片列表</span><br><span class="line">    userInfo = Field()       #用户信息</span><br><span class="line"></span><br><span class="line">class UserItem(Item):</span><br><span class="line">    userId = Field()         #用户id</span><br><span class="line">    name = Field()           #用户name</span><br><span class="line">    avatar = Field()         #用户头像</span><br></pre></td></tr></table></figure></p>
+<p>创建爬虫文件,cd到工程文件夹下后输入命令:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scrapy genspider dbMeinv dbmeinv.com</span><br></pre></td></tr></table></figure></p>
+<p>接着编辑爬虫文件，实例如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"># -*- coding: utf-8 -*-</span><br><span class="line">import scrapy</span><br><span class="line">import re</span><br><span class="line">from DoubanMeinv.items import DoubanmeinvItem,UserItem</span><br><span class="line">import json</span><br><span class="line">import time</span><br><span class="line">from datetime import datetime</span><br><span class="line">from scrapy.exceptions import CloseSpider</span><br><span class="line"></span><br><span class="line">import sys</span><br><span class="line">reload(sys)</span><br><span class="line">sys.setdefaultencoding(&apos;utf8&apos;)</span><br><span class="line"></span><br><span class="line">class DbmeinvSpider(scrapy.Spider):</span><br><span class="line">    name = &quot;dbMeinv&quot;</span><br><span class="line">    allowed_domains = [&quot;www.dbmeinv.com&quot;]</span><br><span class="line">    start_urls = (</span><br><span class="line">        &apos;http://www.dbmeinv.com/dbgroup/rank.htm?pager_offset=1&apos;,</span><br><span class="line">    )</span><br><span class="line">    baseUrl = &apos;http://www.dbmeinv.com&apos;</span><br><span class="line">    close_down = False</span><br><span class="line"></span><br><span class="line">    def parse(self, response):</span><br><span class="line">        request = scrapy.Request(response.url,callback=self.parsePageContent)</span><br><span class="line">        yield request</span><br><span class="line"></span><br><span class="line">    #解析每一页的列表</span><br><span class="line">    def parsePageContent(self, response):</span><br><span class="line">        for sel in response.xpath(&apos;//div[@id=&quot;main&quot;]//li[@class=&quot;span3&quot;]&apos;):</span><br><span class="line">            item = DoubanmeinvItem()</span><br><span class="line">            title = sel.xpath(&apos;.//div[@class=&quot;bottombar&quot;]//a[1]/text()&apos;).extract()[0]</span><br><span class="line">            #用strip()方法过滤开头的\r\n\t和空格符</span><br><span class="line">            item[&apos;title&apos;] = title.strip()</span><br><span class="line">            item[&apos;thumbUrl&apos;] = sel.xpath(&apos;.//div[@class=&quot;img_single&quot;]//img/@src&apos;).extract()[0]</span><br><span class="line">            href = sel.xpath(&apos;.//div[@class=&quot;img_single&quot;]/a/@href&apos;).extract()[0]</span><br><span class="line">            item[&apos;href&apos;] = href</span><br><span class="line">            #正则解析id</span><br><span class="line">            pattern = re.compile(&quot;dbgroup/(\d*)&quot;)</span><br><span class="line">            res = pattern.search(href).groups()</span><br><span class="line">            item[&apos;feedId&apos;] = res[0]</span><br><span class="line">            #跳转到详情页面</span><br><span class="line">            request = scrapy.Request(href,callback=self.parseMeinvDetailInfo)</span><br><span class="line">            request.meta[&apos;item&apos;] = item</span><br><span class="line">            yield request</span><br><span class="line">        #判断是否超过限制应该停止</span><br><span class="line">        if(self.close_down == True):</span><br><span class="line">            print &quot;数据重复，close spider&quot;</span><br><span class="line">            raise CloseSpider(reason = &quot;reach max limit&quot;)</span><br><span class="line">        else:</span><br><span class="line">            #获取下一页并加载</span><br><span class="line">            next_link = response.xpath(&apos;//div[@class=&quot;clearfix&quot;]//li[@class=&quot;next next_page&quot;]/a/@href&apos;)</span><br><span class="line">            if(next_link):</span><br><span class="line">                url = next_link.extract()[0]</span><br><span class="line">                link = self.baseUrl + url</span><br><span class="line">                yield scrapy.Request(link,callback=self.parsePageContent)</span><br><span class="line"></span><br><span class="line">    #解析详情页面</span><br><span class="line">    def parseMeinvDetailInfo(self, response):</span><br><span class="line">        item = response.meta[&apos;item&apos;]</span><br><span class="line">        description = response.xpath(&apos;//div[@class=&quot;panel-body markdown&quot;]/p[1]/text()&apos;)</span><br><span class="line">        if(description):</span><br><span class="line">            item[&apos;description&apos;] = description.extract()[0]</span><br><span class="line">        else:</span><br><span class="line">            item[&apos;description&apos;] = &apos;&apos;</span><br><span class="line">        #上传时间</span><br><span class="line">        createOn = response.xpath(&apos;//div[@class=&quot;info&quot;]/abbr/@title&apos;).extract()[0]</span><br><span class="line">        format = &quot;%Y-%m-%d %H:%M:%S.%f&quot;</span><br><span class="line">        t = datetime.strptime(createOn,format)</span><br><span class="line">        timestamp = int(time.mktime(t.timetuple()))</span><br><span class="line">        item[&apos;createOn&apos;] = timestamp</span><br><span class="line">        #用户信息</span><br><span class="line">        user = UserItem()</span><br><span class="line">        avatar = response.xpath(&apos;//div[@class=&quot;user-card&quot;]/div[@class=&quot;pic&quot;]/img/@src&apos;).extract()[0]</span><br><span class="line">        name = response.xpath(&apos;//div[@class=&quot;user-card&quot;]/div[@class=&quot;info&quot;]//li[@class=&quot;name&quot;]/text()&apos;).extract()[0]</span><br><span class="line">        home = response.xpath(&apos;//div[@class=&quot;user-card&quot;]/div[@class=&quot;opt&quot;]/a[@target=&quot;_users&quot;]/@href&apos;).extract()[0]</span><br><span class="line">        user[&apos;avatar&apos;] = avatar</span><br><span class="line">        user[&apos;name&apos;] = name</span><br><span class="line">        #正则解析id</span><br><span class="line">        pattern = re.compile(&quot;/users/(\d*)&quot;)</span><br><span class="line">        res = pattern.search(home).groups()</span><br><span class="line">        user[&apos;userId&apos;] = res[0]</span><br><span class="line">        item[&apos;userId&apos;] = res[0]</span><br><span class="line">        #将item关联user</span><br><span class="line">        item[&apos;userInfo&apos;] = user</span><br><span class="line">        #解析链接</span><br><span class="line">        pics = []</span><br><span class="line">        links = response.xpath(&apos;//div[@class=&quot;panel-body markdown&quot;]/div[@class=&quot;topic-figure cc&quot;]&apos;)</span><br><span class="line">        if(links):</span><br><span class="line">            for a in links:</span><br><span class="line">                img = a.xpath(&apos;./img/@src&apos;)</span><br><span class="line">                if(img):</span><br><span class="line">                    picUrl = img.extract()[0]</span><br><span class="line">                    pics.append(picUrl)</span><br><span class="line">        #转成json字符串保存</span><br><span class="line">        item[&apos;pics&apos;] = json.dumps(list(pics))</span><br><span class="line">        yield item</span><br></pre></td></tr></table></figure></p>
+<p>需要说明的几点内容：</p>
+<ul>
+<li><code>allowed_domin</code>指定Spider在哪个网站爬取数据</li>
+<li><code>start_urls</code>包含了Spider在启动时进行爬取的url列表</li>
+<li><code>parse方法</code>继承自父类，每个初始URL完成下载后生成的Response对象将会作为唯一的参数传递给该函数。该方法负责解析返回的数据(response)，提取数据(生成item)以及生成需要进一步处理的URL的Request对象</li>
+<li><code>xpath</code>解析数据的时候使用(也可以使用css)，关于xpath和css的详细用法请自行搜索</li>
+<li><code>xpath</code>从某个子元素里解析数据时要使用<code>element.xpath(&#39;./***&#39;)</code>而不能使用<code>element.xpath(&#39;/***&#39;)</code>，否则是从最外层解析而不是从element下开始解析</li>
+<li>web站点爬取的text经常包含了我们不想要的\r\n\t或者是空格等字符,这个时候就要使用Python的<code>strip()</code>方法来过滤掉这些数据</li>
+<li>抓取的web页面时间经常是2015-10-1 12:00:00格式，但是我们存储到数据库时要想转成timeStamp的格式，这里用Python的time相关类库来处理,代码见上面</li>
+<li>抓取完某个页面的时候，可能我们还需要抓取跟它相关的详情页面数据，这里用生成<code>Scrapy.Request</code>的方式来继续抓取,并且将当前的item存储到新的request的meta数据中以供后面的代码中读取到已抓取的item</li>
+<li>如果我们想要在某些情况下停止Spider的抓取，在这里设置一个flag位,并在适当的地方抛出一个<code>CloseSpider</code>的异常来停止爬虫，后面会接着提到这个技巧</li>
+</ul>
+<h3 id="4-运行爬虫"><a href="#4-运行爬虫" class="headerlink" title="4.运行爬虫"></a>4.运行爬虫</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scrapy crawl youSpiderName</span><br></pre></td></tr></table></figure>
+<h3 id="5-编写Pipeline"><a href="#5-编写Pipeline" class="headerlink" title="5.编写Pipeline"></a>5.编写Pipeline</h3><p>如果我们要将数据存储到MySQL数据库中，需要安装MySQLdb，安装过程很多坑，遇到了再Google解决吧。一切搞定之后开始编写pipelines.py和settings.py文件<br>首先在settings.py文件中定义好连接MySQL数据库的所需信息，如下所示:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">DB_SERVER = &apos;MySQLdb&apos;</span><br><span class="line">DB_CONNECT = &#123;</span><br><span class="line">    &apos;host&apos; : &apos;localhost&apos;,</span><br><span class="line">    &apos;user&apos; : &apos;root&apos;,</span><br><span class="line">    &apos;passwd&apos; : &apos;&apos;,</span><br><span class="line">    &apos;port&apos; : 3306,</span><br><span class="line">    &apos;db&apos; :&apos;dbMeizi&apos;,</span><br><span class="line">    &apos;charset&apos; : &apos;utf8&apos;,</span><br><span class="line">    &apos;use_unicode&apos; : True</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后编辑pipelines.py文件，添加代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line">from scrapy.conf import settings</span><br><span class="line">from scrapy.exceptions import DropItem</span><br><span class="line">from twisted.enterprise import adbapi</span><br><span class="line">import json</span><br><span class="line"></span><br><span class="line">class DoubanmeinvPipeline(object):</span><br><span class="line">    #插入的sql语句</span><br><span class="line">    feed_key = [&apos;feedId&apos;,&apos;userId&apos;,&apos;createOn&apos;,&apos;title&apos;,&apos;thumbUrl&apos;,&apos;href&apos;,&apos;description&apos;,&apos;pics&apos;]</span><br><span class="line">    user_key = [&apos;userId&apos;,&apos;name&apos;,&apos;avatar&apos;]</span><br><span class="line">    insertFeed_sql = &apos;&apos;&apos;insert into MeiziFeed (%s) values (%s)&apos;&apos;&apos;</span><br><span class="line">    insertUser_sql = &apos;&apos;&apos;insert into MeiziUser (%s) values (%s)&apos;&apos;&apos;</span><br><span class="line">    feed_query_sql = &quot;select * from MeiziFeed where feedId = %s&quot;</span><br><span class="line">    user_query_sql = &quot;select * from MeiziUser where userId = %s&quot;</span><br><span class="line">    feed_seen_sql = &quot;select feedId from MeiziFeed&quot;</span><br><span class="line">    user_seen_sql = &quot;select userId from MeiziUser&quot;</span><br><span class="line">    max_dropcount = 50</span><br><span class="line">    current_dropcount = 0</span><br><span class="line"></span><br><span class="line">    def __init__(self):</span><br><span class="line">        dbargs = settings.get(&apos;DB_CONNECT&apos;)</span><br><span class="line">        db_server = settings.get(&apos;DB_SERVER&apos;)</span><br><span class="line">        dbpool = adbapi.ConnectionPool(db_server,**dbargs)</span><br><span class="line">        self.dbpool = dbpool</span><br><span class="line">        #更新看过的id列表</span><br><span class="line">        d = self.dbpool.runInteraction(self.update_feed_seen_ids)</span><br><span class="line">        d.addErrback(self._database_error)</span><br><span class="line">        u = self.dbpool.runInteraction(self.update_user_seen_ids)</span><br><span class="line">        u.addErrback(self._database_error)</span><br><span class="line"></span><br><span class="line">    def __del__(self):</span><br><span class="line">        self.dbpool.close()</span><br><span class="line"></span><br><span class="line">    #更新feed已录入的id列表</span><br><span class="line">    def update_feed_seen_ids(self, tx):</span><br><span class="line">        tx.execute(self.feed_seen_sql)</span><br><span class="line">        result = tx.fetchall()</span><br><span class="line">        if result:</span><br><span class="line">            #id[0]是因为result的子项是tuple类型</span><br><span class="line">            self.feed_ids_seen = set([int(id[0]) for id in result])</span><br><span class="line">        else:</span><br><span class="line">            #设置已查看过的id列表</span><br><span class="line">            self.feed_ids_seen = set()</span><br><span class="line"></span><br><span class="line">    #更新user已录入的id列表</span><br><span class="line">    def update_user_seen_ids(self, tx):</span><br><span class="line">        tx.execute(self.user_seen_sql)</span><br><span class="line">        result = tx.fetchall()</span><br><span class="line">        if result:</span><br><span class="line">            #id[0]是因为result的子项是tuple类型</span><br><span class="line">            self.user_ids_seen = set([int(id[0]) for id in result])</span><br><span class="line">        else:</span><br><span class="line">            #设置已查看过的id列表</span><br><span class="line">            self.user_ids_seen = set()</span><br><span class="line"></span><br><span class="line">    #处理每个item并返回</span><br><span class="line">    def process_item(self, item, spider):</span><br><span class="line">        query = self.dbpool.runInteraction(self._conditional_insert, item)</span><br><span class="line">        query.addErrback(self._database_error, item)</span><br><span class="line"></span><br><span class="line">        feedId = item[&apos;feedId&apos;]</span><br><span class="line">        if(int(feedId) in self.feed_ids_seen):</span><br><span class="line">            self.current_dropcount += 1</span><br><span class="line">            if(self.current_dropcount &gt;= self.max_dropcount):</span><br><span class="line">                spider.close_down = True</span><br><span class="line">            raise DropItem(&quot;重复的数据:%s&quot; % item[&apos;feedId&apos;])</span><br><span class="line">        else:</span><br><span class="line">            return item</span><br><span class="line"></span><br><span class="line">    #插入数据</span><br><span class="line">    def _conditional_insert(self, tx, item):</span><br><span class="line">        #插入Feed</span><br><span class="line">        tx.execute(self.feed_query_sql, (item[&apos;feedId&apos;]))</span><br><span class="line">        result = tx.fetchone()</span><br><span class="line">        if result == None:</span><br><span class="line">            self.insert_data(item,self.insertFeed_sql,self.feed_key)</span><br><span class="line">        else:</span><br><span class="line">            print &quot;该feed已存在数据库中:%s&quot; % item[&apos;feedId&apos;]</span><br><span class="line">        #添加进seen列表中</span><br><span class="line">        feedId = item[&apos;feedId&apos;]</span><br><span class="line">        if int(feedId) not in self.feed_ids_seen:</span><br><span class="line">            self.feed_ids_seen.add(int(feedId))</span><br><span class="line">        #插入User</span><br><span class="line">        user = item[&apos;userInfo&apos;]</span><br><span class="line">        tx.execute(self.user_query_sql, (user[&apos;userId&apos;]))</span><br><span class="line">        user_result = tx.fetchone()</span><br><span class="line">        if user_result == None:</span><br><span class="line">            self.insert_data(user,self.insertUser_sql,self.user_key)</span><br><span class="line">        else:</span><br><span class="line">            print &quot;该用户已存在数据库:%s&quot; % user[&apos;userId&apos;]</span><br><span class="line">        #添加进seen列表中</span><br><span class="line">        userId = user[&apos;userId&apos;]</span><br><span class="line">        if int(userId) not in self.user_ids_seen:</span><br><span class="line">            self.user_ids_seen.add(int(userId))</span><br><span class="line"></span><br><span class="line">    #插入数据到数据库中</span><br><span class="line">    def insert_data(self, item, insert, sql_key):</span><br><span class="line">        fields = u&apos;,&apos;.join(sql_key)</span><br><span class="line">        qm = u&apos;,&apos;.join([u&apos;%s&apos;] * len(sql_key))</span><br><span class="line">        sql = insert % (fields,qm)</span><br><span class="line">        data = [item[k] for k in sql_key]</span><br><span class="line">        return self.dbpool.runOperation(sql,data)</span><br><span class="line"></span><br><span class="line">    #数据库错误</span><br><span class="line">    def _database_error(self, e):</span><br><span class="line">        print &quot;Database error: &quot;, e</span><br></pre></td></tr></table></figure></p>
+<p>说明几点内容：</p>
+<ul>
+<li><code>process_item</code>:每个item通过pipeline组件都需要调用该方法，这个方法必须返回一个Item对象,或者抛出DropItem异常，被丢弃的item将不会被之后的pipeline组件所处理。</li>
+<li>已经抓取到的数据不应该再处理，这里创建了两个ids_seen方法来保存已抓取的id数据，如果已存在就Drop掉item</li>
+<li>如果重复抓取的数据过多时，这里设置了个上限值(50),如果超过了上限值就改变spider的关闭flag标志位，然后spider判断flag值在适当的时候抛出<code>CloseSpider</code>异常，关闭Spider代码见爬虫文件。这里通过设置flag标志位的方式来关闭爬虫主要是因为我测试的时候发现在pipelines中调用停止爬虫的方法都不起效果，故改成这种方式</li>
+<li>因为Scrapy是基于twisted的，所以这里用adbapi来连接并操作MySQL数据库</li>
+</ul>
+<p>最后在settings.py文件中启用pipeline<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ITEM_PIPELINES = &#123;</span><br><span class="line">   &apos;DoubanMeinv.pipelines.DoubanmeinvPipeline&apos;: 300,</span><br><span class="line">   # &apos;DoubanMeinv.pipelines.ImageCachePipeline&apos;: 500,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="6-变换User-Agent，避免爬虫被ban"><a href="#6-变换User-Agent，避免爬虫被ban" class="headerlink" title="6.变换User-Agent，避免爬虫被ban"></a>6.变换User-Agent，避免爬虫被ban</h3><p>我们抓取的网站可能会检查User-Agent，所以为了爬虫正常运行我们需要设置请求的User-Agent。对于频繁的请求，还要对User-Agent做随机变换以防被ban,这里通过设置Downloader Middleware来修改爬虫的request和respons<br>在setting.py文件中添加User-Agent列表<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">DOWNLOADER_MIDDLEWARES = &#123;</span><br><span class="line">   &apos;DoubanMeinv.middlewares.RandomUserAgent&apos;: 1,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">USER_AGENTS = [</span><br><span class="line">    &quot;Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; AcooBrowser; .NET CLR 1.1.4322; .NET CLR 2.0.50727)&quot;,</span><br><span class="line">    &quot;Mozilla/4.0 (compatible; MSIE 7.0; AOL 9.5; AOLBuild 4337.35; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)&quot;,</span><br><span class="line">    &quot;Mozilla/5.0 (X11; U; Linux; en-US) AppleWebKit/527+ (KHTML, like Gecko, Safari/419.3) Arora/0.6&quot;,</span><br><span class="line">    &quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11&quot;,</span><br><span class="line">    &quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_3) AppleWebKit/535.20 (KHTML, like Gecko) Chrome/19.0.1036.7 Safari/535.20&quot;,</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>修改middlewares.py文件添加如下代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">import random</span><br><span class="line"></span><br><span class="line">class RandomUserAgent(object):</span><br><span class="line">    def __init__(self, agents):</span><br><span class="line">        self.agents = agents</span><br><span class="line"></span><br><span class="line">    @classmethod</span><br><span class="line">    def from_crawler(cls, crawler):</span><br><span class="line">        return cls(crawler.settings.getlist(&apos;USER_AGENTS&apos;))</span><br><span class="line"></span><br><span class="line">    def process_request(self, request, spider):</span><br><span class="line">        request.headers.setdefault(&apos;User-Agent&apos;, random.choice(self.agents))</span><br></pre></td></tr></table></figure></p>
+<h3 id="7-禁用Cookie-设置请求延迟"><a href="#7-禁用Cookie-设置请求延迟" class="headerlink" title="7.禁用Cookie+设置请求延迟"></a>7.禁用Cookie+设置请求延迟</h3><p>某些网站可能会根据cookie来分析爬取的轨迹，为了被ban，我们最好也禁用掉cookie;同时为了避免请求太频繁而造成爬虫被ban，我们还需要设置请求间隔时间,在settings.py文件中添加以下代码:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DOWNLOAD_DELAY=1</span><br><span class="line">COOKIES_ENABLED=False</span><br></pre></td></tr></table></figure></p>
+<h3 id="8-抓取图片并保存到本地"><a href="#8-抓取图片并保存到本地" class="headerlink" title="8.抓取图片并保存到本地"></a>8.抓取图片并保存到本地</h3><p>有时候我们想把抓取到的图片直接下载并保存到本地，可以用Scrapy内置的<code>ImagesPipeline</code>来处理,因为<code>ImagesPipeline</code>用到了PIL这个图片处理模块，所以我们首先需要使用pip来安装<code>Pillow</code><br>安装成功后，在pipelines.py代码中添加以下代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">from scrapy.pipelines.images import ImagesPipeline</span><br><span class="line">from scrapy import Request</span><br><span class="line">import json</span><br><span class="line"></span><br><span class="line">class ImageCachePipeline(ImagesPipeline):</span><br><span class="line">    def get_media_requests(self, item, info):</span><br><span class="line">        pics = item[&apos;pics&apos;]</span><br><span class="line">        list = json.loads(pics)</span><br><span class="line">        for image_url in list:</span><br><span class="line">            yield Request(image_url)</span><br><span class="line"></span><br><span class="line">    def item_completed(self, results, item, info):</span><br><span class="line">        image_paths=[x[&apos;path&apos;] for ok,x in results if ok]</span><br><span class="line">        if not image_paths:</span><br><span class="line">            print &quot;图片未下载好:%s&quot; % image_paths</span><br><span class="line">            raise DropItem(&apos;图片未下载好 %s&apos;%image_paths)</span><br></pre></td></tr></table></figure></p>
+<p>ImagesPipeline类有一个<code>get_media_requests</code>方法来进行下载的控制，所以我们在这里解析imgUrl并发起进行一个Request,在下载完成之后，会把结果传递到<code>item_completed</code>方法，包括 下载是否成功（ True or False) 以及下载下来保存的路径和下载的路径，这里改写这个方法让他把下载失败的（Flase）的图片的路径输出出来<br>接下来在settings.py里设置下载图片的文件目录并启用ImageCachePipeline<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#设置图片保存到本地的地址和过期时间</span><br><span class="line">IMAGES_STORE=&apos;/Users/chen/Pictures/Meizi&apos;</span><br><span class="line">IMAGES_EXPIRES = 90</span><br><span class="line"></span><br><span class="line">ITEM_PIPELINES = &#123;</span><br><span class="line">   &apos;DoubanMeinv.pipelines.DoubanmeinvPipeline&apos;: 300,</span><br><span class="line">   &apos;DoubanMeinv.pipelines.ImageCachePipeline&apos;: 500,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>等待爬虫执行完之后去IMAGES_STORE路径下查看图片就是了</p>
+<h3 id="9-自动运行爬虫"><a href="#9-自动运行爬虫" class="headerlink" title="9.自动运行爬虫"></a>9.自动运行爬虫</h3><p>为了源源不断获取数据，可通过命令让爬虫每天都运行来抓取数据<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 为当前用户新增任务</span><br><span class="line">crontab -e</span><br><span class="line">// 增加如下记录 注意替换自己的爬虫目录 由于环境变量的原因，scrapy要给出全路径</span><br><span class="line">0 10 * * * cd /home/chen/pyWork/DoubanMeinvScrapy &amp;&amp; /usr/bin/scrapy crawl dbmeinv</span><br></pre></td></tr></table></figure></p>
+<p>上面的命令添加了一个任务，这个任务会每天早上10：00启动，这个任务要做得就是进入爬虫目录，并启动爬虫。<br>如果你不知道自己的scrapy的全路径，可以用终端下用<code>which scrapy</code>来查看<br><br></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结:"></a>总结:</h3><p>以上的内容只是自己在使用Scrapy过程中的一些心得体会，算是简单入门Scrapy了，接下来还得了解分布式爬取以及一些更高级的技巧，以后有新的经验了再更新。Enjoy it!</p>
+</section>
+    <!-- Tags START -->
+    
+    <!-- Tags END -->
+    <!-- 打赏 START -->
+    
+      <div class="money-like">
+        <div class="reward-btn">
+          赏
+          <span class="money-code">
+            <span class="alipay-code">
+              <div class="code-image"></div>
+              <b>使用支付宝打赏</b>
+            </span>
+            <span class="wechat-code">
+              <div class="code-image"></div>
+              <b>使用微信打赏</b>
+            </span>
+          </span>
+        </div>
+        <p class="notice">若你觉得我的文章对你有帮助，欢迎点击上方按钮对我打赏</p>
+      </div>
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    <div class="qrcode">
+      <canvas id="share-qrcode"></canvas>
+      <p class="notice">扫描二维码，分享此文章</p>
+    </div>
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://yoursite.com/2015/11/17/scrapypa-chong-bi-ji/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+     // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+        
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+
+    // gitment
+    var gitmentConfig = "cocoa_chen";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "Scrapy爬虫笔记",
+        owner: "cocoa_chen",
+        repo: "cocoa_chen.github.io",
+        oauth: {
+          client_id: "d57b44b31039f0b27ac1",
+          client_secret: "febe10684bfc8a5347892587bcbf31f735b44579"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  })();
+</script>
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2017 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+<script src="/js/script.js"></script>
+  </body>
+</html>

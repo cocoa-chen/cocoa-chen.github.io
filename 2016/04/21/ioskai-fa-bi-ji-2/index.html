@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="cocoa_chen&#39;s blog">
+  <meta name="keyword" content="objective-C, cocoa_chen, Swift">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      iOS开发笔记 第二篇 | cocoa_chen
+    
+  </title>
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+  <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+  <script src="/js/qrious.js"></script>
+<script src="/js/gitment.js"></script>
+</head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>cocoa_chen</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>iOS开发笔记 第二篇</h2>
+  <p class="post-date">2016-04-21</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><a id="more"></a>
+<h3 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h3><ul>
+<li>dispatch_group_enter和dispatch_group_leave</li>
+<li>如何获取statusbar的高度</li>
+<li>UILabel在iOS8.X系统上高度为0时显示一部分的解决办法</li>
+<li>如何判断子类是否复写了父类的方法</li>
+</ul>
+<h3 id="1-dispatch-group-enter-和dispatch-group-leave"><a href="#1-dispatch-group-enter-和dispatch-group-leave" class="headerlink" title="1. dispatch_group_enter()和dispatch_group_leave()"></a>1. dispatch_group_enter()和dispatch_group_leave()</h3><p>在平时的开发需求中，经常会遇到需要将几项操作执行完毕之后再执行最后的completion，使用GCD的group便可满足我们的需求，示例代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">dispatch_group_t group = dispatch_group_create();</span><br><span class="line">dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);</span><br><span class="line">dispatch_group_async(group, queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;action 1&quot;);</span><br><span class="line">&#125;);</span><br><span class="line">dispatch_group_async(group, queue, ^&#123;</span><br><span class="line">    NSLog(@&quot;action 2&quot;);</span><br><span class="line">&#125;);</span><br><span class="line">//通知主线程刷新UI或者执行其他操作</span><br><span class="line">dispatch_group_notify(group, dispatch_get_main_queue(), ^&#123;</span><br><span class="line">    NSLog(@&quot;finish&quot;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>当然还有另外一种情况，当要执行的操作不是用dispatch_group_async来实现而是采用async的block回调时(比如使用AFNetworking的网络请求操作)，上面的代码就不太合适了，此时可以使用dispatch_group_enter()和dispatch_group_leave()来解决，示例代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">dispatch_group_t group = dispatch_group_create();</span><br><span class="line">//请求动态信息</span><br><span class="line">dispatch_group_enter(group);</span><br><span class="line">[self fetchFeedInfoWithCompletion:^(NSDictionary *feed, NSError *error) &#123;</span><br><span class="line">    //do something with FeedInfo</span><br><span class="line">    dispatch_group_leave(group);</span><br><span class="line">&#125;];</span><br><span class="line">//请求评论信息</span><br><span class="line">dispatch_group_enter(group);</span><br><span class="line">[self fetchCommentsWithCompletion:^(NSDictionary *feed, NSError *error) &#123;</span><br><span class="line">    //do something with Comments</span><br><span class="line">    dispatch_group_leave(group);</span><br><span class="line">&#125;];</span><br><span class="line">//上面的请求都执行完毕之后在主线程刷新UI</span><br><span class="line">dispatch_group_notify(group, dispatch_get_main_queue(), ^&#123;</span><br><span class="line">    //刷新UI等</span><br><span class="line">    //reloadData...</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>上面的代码中notify的block代码会在fetchFeedInfoWithCompletion和fetchCommentsWithCompletion的block回调之后在执行。需要注意的问题是dispatch_group_enter()和dispatch_group_leave()总是成对出现的，如果少写了dispatch_group_leave()会导致dispatch_group_notify的block不会执行；如果少写了dispatch_group_enter()则会导致dispatch_group_notify的block提前执行并且会程序崩溃。</p>
+<h3 id="2-如何获取statusbar的高度"><a href="#2-如何获取statusbar的高度" class="headerlink" title="2.如何获取statusbar的高度:"></a>2.如何获取statusbar的高度:</h3><p>示例代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CGFloat AACStatusBarHeight()</span><br><span class="line">&#123;</span><br><span class="line">    CGSize statusBarSize = [[UIApplication sharedApplication] statusBarFrame].size;</span><br><span class="line">    return MIN(statusBarSize.width, statusBarSize.height);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>参考链接:<a href="http://stackoverflow.com/questions/26036744/display-status-bar-on-landscape-orientation-for-ios-8" target="_blank" rel="noopener">http://stackoverflow.com/questions/26036744/display-status-bar-on-landscape-orientation-for-ios-8</a></p>
+<h3 id="3-UILabel在iOS8-X系统上高度为0时显示一部分的解决办法"><a href="#3-UILabel在iOS8-X系统上高度为0时显示一部分的解决办法" class="headerlink" title="3.UILabel在iOS8.X系统上高度为0时显示一部分的解决办法"></a>3.UILabel在iOS8.X系统上高度为0时显示一部分的解决办法</h3><p>UILabel在iOS8.X系统上高度为0时仍然会显示中间的某一部分，而在iOS7.X和iOS9.X系统上则没有这个问题，应该是Apple的一个bug,示例代码以及在iOS8.X上的效果如下所示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(100, 100, 200, 0)];  //为了测试，设置高度为0</span><br><span class="line">label.backgroundColor = [UIColor blueColor];  //高度为0时背景色并不会显示,这里为了明显设置为蓝色</span><br><span class="line">label.textColor = [UIColor blackColor];</span><br><span class="line">label.text = @&quot;测试&quot;;</span><br><span class="line">[self.view addSubview:label];</span><br></pre></td></tr></table></figure></p>
+<p><img src="/images/iOSJiqiao2/errorUI.png" alt=""></p>
+<p>解决办法有两种：手动设置label的clipsToBounds为YES,或者当高度为0时hidden掉label。代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">label.clipsToBounds = YES;</span><br><span class="line">//label.hidden = YES;  //高度为0时hidden掉</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-如何判断子类是否复写了父类的方法"><a href="#4-如何判断子类是否复写了父类的方法" class="headerlink" title="4.如何判断子类是否复写了父类的方法"></a>4.如何判断子类是否复写了父类的方法</h3><p>以前用Runtime实现过判断子类是否复写父类方法的功能，今天在阅读<code>UITableView-FDTemplateLayoutCell</code>的源码时发现了一种更方便的判断方法，逻辑如下：<br>首先创建两个类，Person类继承自NSObject；我的码农Coder类继承自Person，同时在Person类中定义<code>doSomething</code>的方法,如下所示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">@interface Person : NSObject</span><br><span class="line"></span><br><span class="line">- (void)doSomething;</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@interface Coder : Person</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure></p>
+<p>接着在单元测试中实现判断，主要逻辑是子类对象不是由父类创建以及判断子类调用方法的IMP和父类调用方法的IMP是否一致，代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">- (void)test_inheritedAndOverrided</span><br><span class="line">&#123;</span><br><span class="line">    //判断子类是否复写了父类的方法</span><br><span class="line">    Coder *coder = [Coder new];</span><br><span class="line">    SEL selector = @selector(doSomething);</span><br><span class="line">    BOOL inherited = ![coder isMemberOfClass:[Person class]]; //判断对象不是由父类本身创建的</span><br><span class="line">    BOOL overrided = [coder.class instanceMethodForSelector:selector] != [Person instanceMethodForSelector:selector]; //判断同一个方法，子类调用的IMP跟父类调用的IMP是否一致，如果不一致则说明子类复写了父类的方法</span><br><span class="line">    if (inherited &amp;&amp; overrided) &#123;</span><br><span class="line">        NSLog(@&quot;子类复写了父类的方法&quot;);</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        NSLog(@&quot;子类没有复写父类的方法&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    XCTAssertTrue(inherited);</span><br><span class="line">    XCTAssertTrue(overrided);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果子类Coder类中复写了<code>doSomething</code>方法，单元测试会通过；如果没有则说明子类没有复写父类的方法</p>
+<p>参考代码: <a href="https://github.com/forkingdog/UITableView-FDTemplateLayoutCell" target="_blank" rel="noopener">https://github.com/forkingdog/UITableView-FDTemplateLayoutCell</a></p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- 打赏 START -->
+    
+      <div class="money-like">
+        <div class="reward-btn">
+          赏
+          <span class="money-code">
+            <span class="alipay-code">
+              <div class="code-image"></div>
+              <b>使用支付宝打赏</b>
+            </span>
+            <span class="wechat-code">
+              <div class="code-image"></div>
+              <b>使用微信打赏</b>
+            </span>
+          </span>
+        </div>
+        <p class="notice">若你觉得我的文章对你有帮助，欢迎点击上方按钮对我打赏</p>
+      </div>
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    <div class="qrcode">
+      <canvas id="share-qrcode"></canvas>
+      <p class="notice">扫描二维码，分享此文章</p>
+    </div>
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://yoursite.com/2016/04/21/ioskai-fa-bi-ji-2/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+     // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+        
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+
+    // gitment
+    var gitmentConfig = "cocoa_chen";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "iOS开发笔记 第二篇",
+        owner: "cocoa_chen",
+        repo: "cocoa_chen.github.io",
+        oauth: {
+          client_id: "d57b44b31039f0b27ac1",
+          client_secret: "febe10684bfc8a5347892587bcbf31f735b44579"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  })();
+</script>
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2017 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+<script src="/js/script.js"></script>
+  </body>
+</html>
