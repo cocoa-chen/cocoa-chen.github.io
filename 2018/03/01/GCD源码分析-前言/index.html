@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="cocoa_chen&#39;s blog">
+  <meta name="keyword" content="objective-C, cocoa_chen, Swift">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      GCD源码分析-前言 | cocoa_chen
+    
+  </title>
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+  <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+  <script src="/js/qrious.js"></script>
+<script src="/js/gitment.js"></script>
+</head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>cocoa_chen</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>GCD源码分析-前言</h2>
+  <p class="post-date">2018-03-01</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><a id="more"></a>
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>Grand Central Dispatch(GCD)是Apple推出的一套多线程解决方案，极大的方便了开发者进行多线程编程。通过阅读libdispatch的源码可以更好的帮助我们理解和使用GCD。libdispatch的源码版本很多，源代码风格各版本都有不同，但大体逻辑没有太大变化。libdispatch的源码下载地址<a href="https://opensource.apple.com/tarballs/libdispatch/" target="_blank" rel="noopener">在这里</a>,我选择阅读的版本是<code>libdispatch-339.92.1</code>。</p>
+<h3 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h3><p>阅读GCD的源码之前，先了解一些相关知识，方便后面的理解。</p>
+<h5 id="DISPATCH-DECL"><a href="#DISPATCH-DECL" class="headerlink" title="DISPATCH_DECL"></a>DISPATCH_DECL</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#define DISPATCH_DECL(name) typedef struct name##_s *name##_t</span><br></pre></td></tr></table></figure>
+<p>GCD中的变量大多使用了这个宏，比如<code>DISPATCH_DECL(dispatch_queue)</code>展开后是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">typedef struct dispatch_queue_s *dispatch_queue_t；</span><br></pre></td></tr></table></figure>
+<p>它的意思是定义一个<code>dispatch_queue_t</code>类型的指针，指向了一个<code>dispatch_queue_s</code>类型的结构体。</p>
+<h5 id="fastpath-vs-slowpath"><a href="#fastpath-vs-slowpath" class="headerlink" title="fastpath vs slowpath"></a>fastpath vs slowpath</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#define fastpath(x) ((typeof(x))__builtin_expect((long)(x), ~0l))</span><br><span class="line">#define slowpath(x) ((typeof(x))__builtin_expect((long)(x), 0l))</span><br></pre></td></tr></table></figure>
+<p><code>__builtin_expect</code>是编译器用来优化执行速度的函数，fastpath表示条件更可能成立，slowpath表示条件更不可能成立。我们在阅读源码的时候可以做忽略处理。</p>
+<h5 id="TSD"><a href="#TSD" class="headerlink" title="TSD"></a>TSD</h5><p>Thread Specific Data(TSD)是指线程私有数据。在多线程中，会用全局变量来实现多个函数间的数据共享，局部变量来实现内部的单独访问。TSD则是能够在同一个线程的不同函数中被访问，在不同线程时，相同的键值获取的数据随线程不同而不同。可以通过pthread的相关api来实现TSD:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">//创建key</span><br><span class="line">int pthread_key_create(pthread_key_t *, void (* _Nullable)(void *));</span><br><span class="line">//get方法</span><br><span class="line">void* _Nullable pthread_getspecific(pthread_key_t);</span><br><span class="line">//set方法</span><br><span class="line">int pthread_setspecific(pthread_key_t , const void * _Nullable);</span><br></pre></td></tr></table></figure>
+<h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><p>dispatch_object_s结构体如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">//GCD的基类</span><br><span class="line">struct dispatch_object_s &#123;</span><br><span class="line">	DISPATCH_STRUCT_HEADER(object);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">//os object头部宏定义</span><br><span class="line">#define _OS_OBJECT_HEADER(isa, ref_cnt, xref_cnt) \</span><br><span class="line">        isa; /* must be pointer-sized */ \  //isa</span><br><span class="line">        int volatile ref_cnt; \             //引用计数</span><br><span class="line">        int volatile xref_cnt               //外部引用计数，两者都为0时释放</span><br><span class="line">        </span><br><span class="line">//dispatch结构体头部</span><br><span class="line">#define DISPATCH_STRUCT_HEADER(x) \</span><br><span class="line">	_OS_OBJECT_HEADER( \</span><br><span class="line">	const struct dispatch_##x##_vtable_s *do_vtable, \  //vtable结构体</span><br><span class="line">	do_ref_cnt, \</span><br><span class="line">	do_xref_cnt); \                            </span><br><span class="line">	struct dispatch_##x##_s *volatile do_next; \   //下一个do</span><br><span class="line">	struct dispatch_queue_s *do_targetq; \         //目标队列</span><br><span class="line">	void *do_ctxt; \                               //上下文</span><br><span class="line">	void *do_finalizer; \                          //销毁时调用函数</span><br><span class="line">	unsigned int do_suspend_cnt;                   //suspend计数，用作暂停标志</span><br><span class="line">```	</span><br><span class="line"></span><br><span class="line">dispatch_continuation_s结构体主要封装block和function，`dispatch_async`中的block最终都会封装成这个数据类型，定义如下：</span><br></pre></td></tr></table></figure>
+<p>struct dispatch_continuation_s {<br>    DISPATCH_CONTINUATION_HEADER(continuation);<br>};</p>
+<p>//continuation结构体头部</p>
+<p>#define DISPATCH_CONTINUATION_HEADER(x) \<br>    _OS_OBJECT_HEADER( \<br>    const void <em>do_vtable, \                            do_ref_cnt, \<br>    do_xref_cnt); \                                 //_OS_OBJECT<em>HEADER定义<br>    struct dispatch</em>##x##_s </em>volatile do_next; \    //下一个任务<br>    dispatch_function_t dc_func; \                  //执行内容<br>    void <em>dc_ctxt; \                                //上下文<br>    void </em>dc_data; \                                //相关数据<br>    void *dc_other;                                 //其他<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">dispatch_object_t是个union的联合体，可以用dispatch_object_t代表这个联合体里的所有数据结构。</span><br></pre></td></tr></table></figure></p>
+<p>typedef union {<br>    struct _os_object_s <em>_os_obj;<br>    struct dispatch_object_s </em>_do;             //object结构体<br>    struct dispatch_continuation_s <em>_dc;       //任务,dispatch_aync的block会封装成这个数据结构<br>    struct dispatch_queue_s </em>_dq;              //队列<br>    struct dispatch_queue_attr_s <em>_dqa;        //队列属性<br>    struct dispatch_group_s </em>_dg;              //群组操作<br>    struct dispatch_source_s <em>_ds;             //source结构体<br>    struct dispatch_mach_s </em>_dm;<br>    struct dispatch_mach_msg_s <em>_dmsg;<br>    struct dispatch_timer_aggregate_s </em>_dta;<br>    struct dispatch_source_attr_s <em>_dsa;       //source属性<br>    struct dispatch_semaphore_s </em>_dsema;       //信号量<br>    struct dispatch_data_s <em>_ddata;<br>    struct dispatch_io_s </em>_dchannel;<br>    struct dispatch_operation_s <em>_doperation;<br>    struct dispatch_disk_s </em>_ddisk;<br>} dispatch_object_t <strong>attribute</strong>((<strong>transparent_union</strong>));<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">GCD的vtable经过各种宏定义的转换后，结构体头部的定义会如下所示：</span><br></pre></td></tr></table></figure></p>
+<p>//dispatch vtable的头部</p>
+<p>#define DISPATCH_VTABLE_HEADER(x) \<br>    unsigned long const do_type; \     //类型<br>    const char <em>const do_kind; \       //种类，比如:group/queue/semaphore<br>    size_t (</em>const do<em>debug)(struct dispatch</em>##x##_s <em>, char </em>, size_t); \ //debug用<br>    void (<em>const do<em>invoke)(struct dispatch</em>##x##_s </em>); \    //invoke回调<br>    unsigned long (<em>const do<em>probe)(struct dispatch</em>##x##_s </em>); \   //probe回调<br>    void (<em>const do<em>dispose)(struct dispatch</em>##x##_s </em>);     //dispose回调，销毁时调用</p>
+<p>//dx_xxx开头的宏定义，后续文章会用到，本质是调用vtable的do_xxx</p>
+<p>#define dx_type(x) (x)-&gt;do_vtable-&gt;do_type</p>
+<p>#define dx_metatype(x) ((x)-&gt;do_vtable-&gt;do_type &amp; _DISPATCH_META_TYPE_MASK)</p>
+<p>#define dx_kind(x) (x)-&gt;do_vtable-&gt;do_kind</p>
+<p>#define dx_debug(x, y, z) (x)-&gt;do_vtable-&gt;do_debug((x), (y), (z))</p>
+<p>#define dx_dispose(x) (x)-&gt;do_vtable-&gt;do_dispose(x)</p>
+<p>#define dx_invoke(x) (x)-&gt;do_vtable-&gt;do_invoke(x)</p>
+<p>#define dx_probe(x) (x)-&gt;do_vtable-&gt;do_probe(x)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">dispatch_queue_s是队列的结构体，定义如下：</span><br></pre></td></tr></table></figure></p>
+<p>struct dispatch_queue_s {<br>    DISPATCH_STRUCT_HEADER(queue);    //基础header<br>    DISPATCH_QUEUE_HEADER;            //队列头部，见下面的定义<br>    DISPATCH_QUEUE_CACHELINE_PADDING; // for static queues only<br>};<br>//队列自己的头部定义</p>
+<p>#define DISPATCH_QUEUE_HEADER \<br>    uint32_t volatile dq_running; \                       //队列运行的任务数量<br>    struct dispatch_object_s <em>volatile dq_items_head; \   //链表头部节点<br>    struct dispatch_object_s </em>volatile dq_items_tail; \   //链表尾部节点<br>    dispatch_queue_t dq_specific_q; \                     //specific队列<br>    uint32_t dq_width; \                                  //队列并发数<br>    unsigned int dq_is_thread_bound:1; \                  //是否线程绑定<br>    unsigned long dq_serialnum; \                         //队列的序列号<br>    const char *dq_label; \                               //队列名<br>    DISPATCH_INTROSPECTION_QUEUE_LIST;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">队列的do_table中有很多函数指针，阅读queue的源码时会遇到dx_invoke或者dx_probe等函数，它们其实就是调用vtable中定义的函数。下面看一下相关定义：</span><br></pre></td></tr></table></figure></p>
+<p>//main-queue和普通queue的vtable定义<br>DISPATCH_VTABLE_INSTANCE(queue,<br>    .do_type = DISPATCH_QUEUE_TYPE,<br>    .do_kind = “queue”,<br>    .do_dispose = _dispatch_queue_dispose,    //销毁时调用<br>    .do_invoke = _dispatch_queue_invoke,      //invoke函数<br>    .do_probe = _dispatch_queue_probe,        //probe函数<br>    .do_debug = dispatch_queue_debug,         //debug回调<br>);<br>//global-queue的vtable定义<br>DISPATCH_VTABLE_SUBCLASS_INSTANCE(queue_root, queue,<br>    .do_type = DISPATCH_QUEUE_ROOT_TYPE,<br>    .do_kind = “global-queue”,<br>    .do_dispose = _dispatch_pthread_root_queue_dispose,  //global-queue销毁时调用<br>    .do_probe = _dispatch_root_queue_probe,              //_dispatch_wakeup时会调用<br>    .do_debug = dispatch_queue_debug,                    //debug回调<br>);<br>```</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>上述是阅读GCD源码前的基础介绍，后续分析会详细讲解到，先做个铺垫，算是开篇内容了。该系列参考学习了一些优秀博客的文章，链接见参考资料.</p>
+<h3 id="参考资料："><a href="#参考资料：" class="headerlink" title="参考资料："></a>参考资料：</h3><ul>
+<li><a href="https://blog.ibireme.com/2015/05/18/runloop/" target="_blank" rel="noopener">深入理解RunLoop</a></li>
+<li><a href="https://opensource.apple.com/tarballs/libdispatch/" target="_blank" rel="noopener">GCD源码下载地址</a></li>
+<li><a href="https://bestswifter.com/deep-gcd/" target="_blank" rel="noopener">深入理解GCD</a></li>
+<li><a href="http://lingyuncxb.com/2018/01/31/GCD%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%901%20%E2%80%94%E2%80%94%20%E5%BC%80%E7%AF%87/" target="_blank" rel="noopener">GCD源码分析</a></li>
+<li><a href="http://joeleee.github.io/2017/02/21/005.%E6%89%92%E4%BA%86%E6%89%92libdispatch%E6%BA%90%E7%A0%81/" target="_blank" rel="noopener">扒了扒libdispatch源码</a></li>
+<li><a href="https://yq.aliyun.com/articles/61328" target="_blank" rel="noopener">GCD源码分析</a></li>
+<li><a href="https://www.jianshu.com/p/f9e01c69a46f" target="_blank" rel="noopener">关于GCD开发的一些事儿</a></li>
+<li><a href="https://github.com/nixzhu/dev-blog/blob/master/2014-04-19-grand-central-dispatch-in-depth-part-1.md" target="_blank" rel="noopener">GCD 深入理解：第一部分</a></li>
+</ul>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- 打赏 START -->
+    
+      <div class="money-like">
+        <div class="reward-btn">
+          赏
+          <span class="money-code">
+            <span class="alipay-code">
+              <div class="code-image"></div>
+              <b>使用支付宝打赏</b>
+            </span>
+            <span class="wechat-code">
+              <div class="code-image"></div>
+              <b>使用微信打赏</b>
+            </span>
+          </span>
+        </div>
+        <p class="notice">若你觉得我的文章对你有帮助，欢迎点击上方按钮对我打赏</p>
+      </div>
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    <div class="qrcode">
+      <canvas id="share-qrcode"></canvas>
+      <p class="notice">扫描二维码，分享此文章</p>
+    </div>
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://yoursite.com/2018/03/01/GCD源码分析-前言/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+     // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+        
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+
+    // gitment
+    var gitmentConfig = "cocoa-chen";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "GCD源码分析-前言",
+        owner: "cocoa-chen",
+        repo: "cocoa_chen.github.io",
+        oauth: {
+          client_id: "b9855388fb8c8a2af742",
+          client_secret: "1122660f91f5cb724aa3cbdecddd015d9657954f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  })();
+</script>
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2018 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+<script src="/js/script.js"></script>
+  </body>
+</html>

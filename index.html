@@ -115,6 +115,120 @@
   
     <article class="article-card">
       <h2 class="article-head">
+        <a href="/2018/03/15/GCD源码分析之dispatch_once/">GCD源码分析之dispatch_once</a>
+      </h2>
+      <p class="article-date">March 15, 2018</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+前言dispatch_once的代码比较简单也比较简短，下面来看一下底层实现。
+dispatch_once123456789//invoke是指触发block的具体实现，感兴趣的可以看一下Block_layout的结构体#define _dispatch_Block_invoke(bb)  ...
+        
+      </div>
+      <a class="more" href="/2018/03/15/GCD源码分析之dispatch_once/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2018/03/12/GCD源码分析之dispatch_group/">GCD源码分析之dispatch_group</a>
+      </h2>
+      <p class="article-date">March 12, 2018</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+概述dispatch_group可以将GCD的任务归并到一个组里来执行，同时可以监听组里所有任务的执行情况。这里分析一下dispatch_group的底层实现。有以下几个主要的API：
+
+dispatch_group_create
+dispatch_group_enter
+dispatch ...
+        
+      </div>
+      <a class="more" href="/2018/03/12/GCD源码分析之dispatch_group/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2018/03/08/GCD源码分析之dispatch_semaphore/">GCD源码分析之dispatch_semaphore</a>
+      </h2>
+      <p class="article-date">March 8, 2018</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+###概述关于信号量的使用比较简单，主要的API就三个，create、wait和signal,常用来保护资源访问的安全性。下面来分析一下dispatch_semaphore的底层实现。
+###dispatch_semaphore_tdispatch_semaphore_s的机构体：
+123 ...
+        
+      </div>
+      <a class="more" href="/2018/03/08/GCD源码分析之dispatch_semaphore/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2018/03/05/GCD源码分析之dispatch_queue/">GCD源码分析之dispatch_queue</a>
+      </h2>
+      <p class="article-date">March 5, 2018</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+概述关于queue的数据结构和常用定义已经在上篇讲过了，这篇讲一下queue主要的API和相关逻辑。
+dispatch_get_global_queuedispatch_get_global_queue在日常的开发中占有很大的比重，先看一下它的源码：
+123456789dispatch_q ...
+        
+      </div>
+      <a class="more" href="/2018/03/05/GCD源码分析之dispatch_queue/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2018/03/01/GCD源码分析-前言/">GCD源码分析-前言</a>
+      </h2>
+      <p class="article-date">March 1, 2018</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+背景Grand Central Dispatch(GCD)是Apple推出的一套多线程解决方案，极大的方便了开发者进行多线程编程。通过阅读libdispatch的源码可以更好的帮助我们理解和使用GCD。libdispatch的源码版本很多，源代码风格各版本都有不同，但大体逻辑没有太大变化。 ...
+        
+      </div>
+      <a class="more" href="/2018/03/01/GCD源码分析-前言/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
         <a href="/2017/12/06/compile-Runtime-objc4-709/"> objc - 编译Runtime源码objc4-709</a>
       </h2>
       <p class="article-date">December 6, 2017</p>
@@ -204,76 +318,6 @@ UILabel在iOS8.X系统上高度为0时显示一部分的解决办法
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2016/03/29/ioskai-fa-bi-ji-1/">iOS开发笔记 第一篇</a>
-      </h2>
-      <p class="article-date">March 29, 2016</p>
-      
-        
-  <a href="/tags#iOS" >
-    <span class="tag-code">iOS</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          
-目录
-UIDatePicker
-如何暂停和恢复CALayer的动画
-requireGestureRecognizerToFail:
-URLEncode
-用AVSpeechSynthesizer实现文本转语音
-
-1.UIDatePickerUIDatePicker在设置datePickerM ...
-        
-      </div>
-      <a class="more" href="/2016/03/29/ioskai-fa-bi-ji-1/">Read more</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2016/03/29/iosshi-yong-protocolbuffers/">iOS使用ProtocolBuffers</a>
-      </h2>
-      <p class="article-date">March 29, 2016</p>
-      
-        
-  <a href="/tags#iOS" >
-    <span class="tag-code">iOS</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          <h3 id="Protocol-buffers是谷歌出品的语言中立、跟平台无关、可扩展的工具，用来序列化-反序列化数据。相比XML和JSON要轻便灵活，原生支持C-Java和Python。这里主要介绍跟iOS上如何使用Protobuf。"><a href="#Protocol-buffers是谷歌出品的语言中立、跟平台无关、可扩展的工具，用来序列化-反序列化数据。相比XML和JSON要轻便灵活，原生支持C-Java和Python。这里主要介绍跟iOS上如何使用Protobuf。" class="headerlink" title="Protocol buffers是谷歌出品的语言中立、跟平台无关、可扩展的工具，用来序列化/反序列化数据。相比XML和JSON要轻便灵活，原生支持C++,Java和Python。这里主要介绍跟iOS上如何使用Protobuf。"></a>Protocol buffers是谷歌出品的语言中立、跟平台无关、可扩展的工具，用来序列化/反序列化数据。相比XML和JSON要轻便灵活，原生支持C++,Java和Python。这里主要介绍跟iOS上如何使用Protobuf。</h3>
-        
-      </div>
-      <a class="more" href="/2016/03/29/iosshi-yong-protocolbuffers/">Read more</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2016/03/29/iosyu-yin-zhuan-wen-zi-gong-neng-shi-xian/">iOS之语音转文字的功能实现</a>
-      </h2>
-      <p class="article-date">March 29, 2016</p>
-      
-        
-  <a href="/tags#iOS" >
-    <span class="tag-code">iOS</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          
-前言这周做了一个类似于微信语音转文字的功能，过程中踩了几个坑，在这里记录一下以供参考。
-项目简介：我们项目中语音录制和播放分别用的是AVAudioRecorder和AVAudioPlayer。AVAudioRecorder录制后会保存为wav文件，因为wav文件体积比较大，为了节省流量和传 ...
-        
-      </div>
-      <a class="more" href="/2016/03/29/iosyu-yin-zhuan-wen-zi-gong-neng-shi-xian/">Read more</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
         <a href="/2016/03/29/li-yong-nsurlprotocolqie-huan-kai-fa-huan-jing/">使用NSURLProtocol切换开发环境</a>
       </h2>
       <p class="article-date">March 29, 2016</p>
@@ -291,47 +335,6 @@ URLEncode
         
       </div>
       <a class="more" href="/2016/03/29/li-yong-nsurlprotocolqie-huan-kai-fa-huan-jing/">Read more</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2015/11/17/scrapypa-chong-bi-ji/">Scrapy爬虫笔记</a>
-      </h2>
-      <p class="article-date">November 17, 2015</p>
-      
-        
-  <a href="/tags#Scrapy" >
-    <span class="tag-code">Scrapy</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          <p>Scrapy是一个优秀的Python爬虫框架，可以很方便的爬取web站点的信息供我们分析和挖掘，在这记录下最近使用的一些心得。<br>
-        
-      </div>
-      <a class="more" href="/2015/11/17/scrapypa-chong-bi-ji/">Read more</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2015/05/12/lun-boolvaluede-zhong-yao-xing/">论boolValue的重要性</a>
-      </h2>
-      <p class="article-date">May 12, 2015</p>
-      
-        
-  <a href="/tags#iOS" >
-    <span class="tag-code">iOS</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-             
-今天遇到了一个旧项目中的bug，排查半天发现是Number转换成Bool后返回的值不确定导致的。以下是相关的测试代码:123456_testDict = [NSMutableDictionary dictionary];[_testDict setObject:[NSNumber n ...
-        
-      </div>
-      <a class="more" href="/2015/05/12/lun-boolvaluede-zhong-yao-xing/">Read more</a>
     </article>
   
 
@@ -353,7 +356,7 @@ URLEncode
 </div>
     <footer class="app-footer">
   <p class="copyright">
-    &copy; 2017 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    &copy; 2018 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
     <br>
   </p>
 </footer>

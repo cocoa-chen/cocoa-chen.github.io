@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="cocoa_chen&#39;s blog">
+  <meta name="keyword" content="objective-C, cocoa_chen, Swift">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      GCD源码分析之dispatch_group | cocoa_chen
+    
+  </title>
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+  <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+  <script src="/js/qrious.js"></script>
+<script src="/js/gitment.js"></script>
+</head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>cocoa_chen</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>GCD源码分析之dispatch_group</h2>
+  <p class="post-date">2018-03-12</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><a id="more"></a>
+<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>dispatch_group可以将GCD的任务归并到一个组里来执行，同时可以监听组里所有任务的执行情况。这里分析一下dispatch_group的底层实现。有以下几个主要的API：</p>
+<ul>
+<li>dispatch_group_create</li>
+<li>dispatch_group_enter</li>
+<li>dispatch_group_leave</li>
+<li>dispatch_group_wait</li>
+<li>dispatch_group_notify</li>
+<li>dispatch_group_async</li>
+</ul>
+<h3 id="dispatch-group-create"><a href="#dispatch-group-create" class="headerlink" title="dispatch_group_create"></a>dispatch_group_create</h3><p>group的本质是一个初始value为LONG_MAX的semaphore，源码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dispatch_group_t dispatch_group_create(void)</span><br><span class="line">&#123;</span><br><span class="line">	dispatch_group_t dg = (dispatch_group_t)_dispatch_alloc(</span><br><span class="line">			DISPATCH_VTABLE(group), sizeof(struct dispatch_semaphore_s));</span><br><span class="line">	_dispatch_semaphore_init(LONG_MAX, dg);</span><br><span class="line">	return dg;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="dispatch-group-enter"><a href="#dispatch-group-enter" class="headerlink" title="dispatch_group_enter"></a>dispatch_group_enter</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">void dispatch_group_enter(dispatch_group_t dg)</span><br><span class="line">&#123;</span><br><span class="line">	dispatch_semaphore_t dsema = (dispatch_semaphore_t)dg;</span><br><span class="line">	long value = dispatch_atomic_dec2o(dsema, dsema_value, acquire);</span><br><span class="line">	if (slowpath(value &lt; 0)) &#123;</span><br><span class="line">		DISPATCH_CLIENT_CRASH(</span><br><span class="line">				&quot;Too many nested calls to dispatch_group_enter()&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>将<code>dispatch_group_t</code>转换成<code>dispatch_semaphore_t</code>后将<code>dsema_value</code>的值减一</p>
+<h3 id="dispatch-group-leave"><a href="#dispatch-group-leave" class="headerlink" title="dispatch_group_leave"></a>dispatch_group_leave</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">void dispatch_group_leave(dispatch_group_t dg)</span><br><span class="line">&#123;</span><br><span class="line">	dispatch_semaphore_t dsema = (dispatch_semaphore_t)dg;</span><br><span class="line">	long value = dispatch_atomic_inc2o(dsema, dsema_value, release);</span><br><span class="line">	if (slowpath(value &lt; 0)) &#123;</span><br><span class="line">		DISPATCH_CLIENT_CRASH(&quot;Unbalanced call to dispatch_group_leave()&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	if (slowpath(value == LONG_MAX)) &#123;</span><br><span class="line">		(void)_dispatch_group_wake(dsema);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>将<code>dispatch_group_t</code>转换成<code>dispatch_semaphore_t</code>后将<code>dsema_value</code>的值加一，当value等于LONG_MAX时表示所有任务已完成，调用<code>_dispatch_group_wake</code>处理回调。<code>dispatch_group_leave</code>与<code>dispatch_group_enter</code>成对出现。</p>
+<p>当调用了<code>dispatch_group_enter</code>而没有调用<code>dispatch_group_leave</code>时，会造成<code>dispatch_group_notify</code>函数的实现无法执行或者<code>dispatch_group_wait</code>收不到<code>semaphore_signal</code>信号而卡住线程。</p>
+<p>当<code>dispatch_group_leave</code>比<code>dispatch_group_enter</code>多调用了一次时，dispatch_semaphore_t的value会等于LONGMAX+1（2147483647+1）,即long的负数最小值LONG_MIN(–2147483648)。因为此时value小于0，所以会出现”Unbalanced call to dispatch_group_leave()”的崩溃，这是一个特别需要注意的地方。</p>
+<h3 id="dispatch-group-wait"><a href="#dispatch-group-wait" class="headerlink" title="dispatch_group_wait"></a>dispatch_group_wait</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">long dispatch_group_wait(dispatch_group_t dg, dispatch_time_t timeout)</span><br><span class="line">&#123;</span><br><span class="line">	dispatch_semaphore_t dsema = (dispatch_semaphore_t)dg;</span><br><span class="line"></span><br><span class="line">	if (dsema-&gt;dsema_value == LONG_MAX) &#123;</span><br><span class="line">		return 0;</span><br><span class="line">	&#125;</span><br><span class="line">	if (timeout == 0) &#123;</span><br><span class="line">		return KERN_OPERATION_TIMED_OUT;</span><br><span class="line">	&#125;</span><br><span class="line">	return _dispatch_group_wait_slow(dsema, timeout);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果当期value的值为初始值，表示任务都已经完成，直接返回0，如果timeout为0的话也会立即返回。其余情况会调用_dispatch_group_wait_slow方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">static long _dispatch_group_wait_slow(dispatch_semaphore_t dsema, dispatch_time_t timeout)</span><br><span class="line">&#123;</span><br><span class="line">	long orig;</span><br><span class="line"></span><br><span class="line">	mach_timespec_t _timeout;</span><br><span class="line">	kern_return_t kr;</span><br><span class="line"></span><br><span class="line">again:</span><br><span class="line">	if (dsema-&gt;dsema_value == LONG_MAX) &#123;</span><br><span class="line">		return _dispatch_group_wake(dsema);</span><br><span class="line">	&#125;</span><br><span class="line">	(void)dispatch_atomic_inc2o(dsema, dsema_group_waiters, relaxed);</span><br><span class="line">	if (dsema-&gt;dsema_value == LONG_MAX) &#123;</span><br><span class="line">		return _dispatch_group_wake(dsema);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_dispatch_semaphore_create_port(&amp;dsema-&gt;dsema_port);</span><br><span class="line">	</span><br><span class="line">	switch (timeout) &#123;</span><br><span class="line">	default:</span><br><span class="line">		do &#123;</span><br><span class="line">			uint64_t nsec = _dispatch_timeout(timeout);</span><br><span class="line">			_timeout.tv_sec = (typeof(_timeout.tv_sec))(nsec / NSEC_PER_SEC);</span><br><span class="line">			_timeout.tv_nsec = (typeof(_timeout.tv_nsec))(nsec % NSEC_PER_SEC);</span><br><span class="line">			kr = slowpath(semaphore_timedwait(dsema-&gt;dsema_port, _timeout));</span><br><span class="line">		&#125; while (kr == KERN_ABORTED);</span><br><span class="line"></span><br><span class="line">		if (kr != KERN_OPERATION_TIMED_OUT) &#123;</span><br><span class="line">			DISPATCH_SEMAPHORE_VERIFY_KR(kr);</span><br><span class="line">			break;</span><br><span class="line">		&#125;</span><br><span class="line">		// Fall through and try to undo the earlier change to</span><br><span class="line">		// dsema-&gt;dsema_group_waiters</span><br><span class="line">	case DISPATCH_TIME_NOW:</span><br><span class="line">		orig = dsema-&gt;dsema_group_waiters;</span><br><span class="line">		while (orig) &#123;</span><br><span class="line">			if (dispatch_atomic_cmpxchgvw2o(dsema, dsema_group_waiters, orig,</span><br><span class="line">					orig - 1, &amp;orig, relaxed)) &#123;</span><br><span class="line">				return KERN_OPERATION_TIMED_OUT;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		// Another thread called semaphore_signal().</span><br><span class="line">		// Fall through and drain the wakeup.</span><br><span class="line">	case DISPATCH_TIME_FOREVER:</span><br><span class="line">		do &#123;</span><br><span class="line">			kr = semaphore_wait(dsema-&gt;dsema_port);</span><br><span class="line">		&#125; while (kr == KERN_ABORTED);</span><br><span class="line">		DISPATCH_SEMAPHORE_VERIFY_KR(kr);</span><br><span class="line">		break;</span><br><span class="line">	&#125;</span><br><span class="line">	goto again;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到跟dispatch_semaphore的<code>_dispatch_semaphore_wait_slow</code>方法很类似，不同点在于等待完之后会调用<code>_dispatch_group_wake</code>唤醒当前group。<code>_dispatch_group_wake</code>的分析见下面的内容。</p>
+<h3 id="dispatch-group-notify"><a href="#dispatch-group-notify" class="headerlink" title="dispatch_group_notify"></a>dispatch_group_notify</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">void dispatch_group_notify(dispatch_group_t dg, dispatch_queue_t dq,</span><br><span class="line">		dispatch_block_t db)</span><br><span class="line">&#123;</span><br><span class="line">	dispatch_group_notify_f(dg, dq, _dispatch_Block_copy(db),</span><br><span class="line">			_dispatch_call_block_and_release);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void dispatch_group_notify_f(dispatch_group_t dg, dispatch_queue_t dq, void *ctxt,</span><br><span class="line">		void (*func)(void *))</span><br><span class="line">&#123;</span><br><span class="line">	dispatch_semaphore_t dsema = (dispatch_semaphore_t)dg;</span><br><span class="line">	dispatch_continuation_t prev, dsn = _dispatch_continuation_alloc();</span><br><span class="line">	dsn-&gt;do_vtable = (void *)DISPATCH_OBJ_ASYNC_BIT;</span><br><span class="line">	dsn-&gt;dc_data = dq;</span><br><span class="line">	dsn-&gt;dc_ctxt = ctxt;</span><br><span class="line">	dsn-&gt;dc_func = func;</span><br><span class="line">	dsn-&gt;do_next = NULL;</span><br><span class="line">	_dispatch_retain(dq);</span><br><span class="line">	prev = dispatch_atomic_xchg2o(dsema, dsema_notify_tail, dsn, release);</span><br><span class="line">	if (fastpath(prev)) &#123;</span><br><span class="line">		prev-&gt;do_next = dsn;</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		_dispatch_retain(dg);</span><br><span class="line">		dispatch_atomic_store2o(dsema, dsema_notify_head, dsn, seq_cst);</span><br><span class="line">		dispatch_atomic_barrier(seq_cst); // &lt;rdar://problem/11750916&gt;</span><br><span class="line">		if (dispatch_atomic_load2o(dsema, dsema_value, seq_cst) == LONG_MAX) &#123;</span><br><span class="line">			_dispatch_group_wake(dsema);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>dispatch_group_notify的具体实现在dispatch_group_notify_f函数里，逻辑就是将block和queue封装到dispatch_continuation_t里，并将它加到链表的最后面。如果dsema_value的值等于初始值，则调用_dispatch_group_wake处理回调。</p>
+<h3 id="dispatch-group-wake"><a href="#dispatch-group-wake" class="headerlink" title="dispatch_group_wake"></a>dispatch_group_wake</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">static long _dispatch_group_wake(dispatch_semaphore_t dsema)</span><br><span class="line">&#123;</span><br><span class="line">	dispatch_continuation_t next, head, tail = NULL, dc;</span><br><span class="line">	long rval;</span><br><span class="line"></span><br><span class="line">   //将dsema的dsema_notify_head赋值为NULL，同时将之前的内容赋给head</span><br><span class="line">	head = dispatch_atomic_xchg2o(dsema, dsema_notify_head, NULL, relaxed);</span><br><span class="line">	if (head) &#123;</span><br><span class="line">		//将dsema的dsema_notify_tail赋值为NULL，同时将之前的内容赋给tail</span><br><span class="line">		tail = dispatch_atomic_xchg2o(dsema, dsema_notify_tail, NULL, relaxed);</span><br><span class="line">	&#125;</span><br><span class="line">	rval = (long)dispatch_atomic_xchg2o(dsema, dsema_group_waiters, 0, relaxed);</span><br><span class="line">	if (rval) &#123;</span><br><span class="line">		// wake group waiters</span><br><span class="line">		_dispatch_semaphore_create_port(&amp;dsema-&gt;dsema_port);</span><br><span class="line">		do &#123;</span><br><span class="line">			kern_return_t kr = semaphore_signal(dsema-&gt;dsema_port);</span><br><span class="line">			DISPATCH_SEMAPHORE_VERIFY_KR(kr);</span><br><span class="line">		&#125; while (--rval);</span><br><span class="line">	&#125;</span><br><span class="line">	if (head) &#123;</span><br><span class="line">		// async group notify blocks</span><br><span class="line">		do &#123;</span><br><span class="line">			next = fastpath(head-&gt;do_next);</span><br><span class="line">			if (!next &amp;&amp; head != tail) &#123;</span><br><span class="line">				while (!(next = fastpath(head-&gt;do_next))) &#123;</span><br><span class="line">					dispatch_hardware_pause();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			dispatch_queue_t dsn_queue = (dispatch_queue_t)head-&gt;dc_data;</span><br><span class="line">			dc = _dispatch_continuation_free_cacheonly(head);</span><br><span class="line">			//执行dispatch_group_notify的block，见dispatch_queue的分析</span><br><span class="line">			dispatch_async_f(dsn_queue, head-&gt;dc_ctxt, head-&gt;dc_func);</span><br><span class="line">			_dispatch_release(dsn_queue);</span><br><span class="line">			if (slowpath(dc)) &#123;</span><br><span class="line">				_dispatch_continuation_free_to_cache_limit(dc);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; while ((head = next));</span><br><span class="line">		_dispatch_release(dsema);</span><br><span class="line">	&#125;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>dispatch_group_wake</code>会在group中所有事件执行完以后调用，它首先会循环调用<code>semaphore_signal</code>唤醒等待group的信号量，使<code>dispatch_group_wait</code>函数得以返回。<br>然后获取链表中的元素，依次调用<code>dispatch_async_f</code>异步执行<code>dispatch_group_notify</code>函数中注册的回调。</p>
+<h3 id="dispatch-group-async"><a href="#dispatch-group-async" class="headerlink" title="dispatch_group_async"></a>dispatch_group_async</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">void dispatch_group_async(dispatch_group_t dg, dispatch_queue_t dq,</span><br><span class="line">		dispatch_block_t db)</span><br><span class="line">&#123;</span><br><span class="line">	dispatch_group_async_f(dg, dq, _dispatch_Block_copy(db),</span><br><span class="line">			_dispatch_call_block_and_release);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>dispatch_group_async</code>的具体实现见<code>dispatch_group_async_f</code>函数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">void dispatch_group_async_f(dispatch_group_t dg, dispatch_queue_t dq, void *ctxt,</span><br><span class="line">		dispatch_function_t func)</span><br><span class="line">&#123;</span><br><span class="line">	dispatch_continuation_t dc;</span><br><span class="line"></span><br><span class="line">	_dispatch_retain(dg);</span><br><span class="line">	dispatch_group_enter(dg);</span><br><span class="line"></span><br><span class="line">	dc = _dispatch_continuation_alloc();</span><br><span class="line"></span><br><span class="line">  //DISPATCH_OBJ_GROUP_BIT会在_dispatch_continuation_pop方法中用来判断是否为group，如果为group会执行dispatch_group_leave</span><br><span class="line">	dc-&gt;do_vtable = (void *)(DISPATCH_OBJ_ASYNC_BIT | DISPATCH_OBJ_GROUP_BIT);</span><br><span class="line">	dc-&gt;dc_func = func;</span><br><span class="line">	dc-&gt;dc_ctxt = ctxt;</span><br><span class="line">	dc-&gt;dc_data = dg;</span><br><span class="line"></span><br><span class="line">	// No fastpath/slowpath hint because we simply don&apos;t know</span><br><span class="line">	if (dq-&gt;dq_width != 1 &amp;&amp; dq-&gt;do_targetq) &#123;</span><br><span class="line">		return _dispatch_async_f2(dq, dc);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	_dispatch_queue_push(dq, dc);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>dispatch_group_async_f</code>与<code>dispatch_async_f</code>代码类似，主要执行了以下操作：<br>1、调用dispatch_group_enter<br>2、将block和queue等信息记录到dispatch_continuation_t中，并将它加入到队列的链表中。<br>3、_dispatch_continuation_pop执行时会判断是否为group，是的话执行完任务再调用dispatch_group_leave以达到信号量value的平衡。</p>
+<p>_dispatch_continuation_pop源码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">static inline void _dispatch_continuation_pop(dispatch_object_t dou)</span><br><span class="line">&#123;</span><br><span class="line">	dispatch_continuation_t dc = dou._dc, dc1;</span><br><span class="line">	dispatch_group_t dg;</span><br><span class="line"></span><br><span class="line">	_dispatch_trace_continuation_pop(_dispatch_queue_get_current(), dou);</span><br><span class="line">	//判断是否为队列，是的话执行队列的invoke函数</span><br><span class="line">	if (DISPATCH_OBJ_IS_VTABLE(dou._do)) &#123;</span><br><span class="line">		return dx_invoke(dou._do);</span><br><span class="line">	&#125; </span><br><span class="line">	//dispatch_continuation_t结构体，执行具体任务</span><br><span class="line">	if ((long)dc-&gt;do_vtable &amp; DISPATCH_OBJ_ASYNC_BIT) &#123;</span><br><span class="line">		dc1 = _dispatch_continuation_free_cacheonly(dc);</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		dc1 = NULL;</span><br><span class="line">	&#125;</span><br><span class="line">	if ((long)dc-&gt;do_vtable &amp; DISPATCH_OBJ_GROUP_BIT) &#123;</span><br><span class="line">		dg = dc-&gt;dc_data;</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		dg = NULL;</span><br><span class="line">	&#125;</span><br><span class="line">	_dispatch_client_callout(dc-&gt;dc_ctxt, dc-&gt;dc_func);</span><br><span class="line">	if (dg) &#123;</span><br><span class="line">	   //这是group操作，执行leave操作对应最初的enter</span><br><span class="line">		dispatch_group_leave(dg);</span><br><span class="line">		_dispatch_release(dg);</span><br><span class="line">	&#125;</span><br><span class="line">	 _dispatch_introspection_queue_item_complete(dou);</span><br><span class="line">	if (slowpath(dc1)) &#123;</span><br><span class="line">		_dispatch_continuation_free_to_cache_limit(dc1);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>###总结</p>
+<p>group本质是dispatch_semaphore，也用到了queue的一些函数。关于semaphore和queue的内容可以参考之前的分析</p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- 打赏 START -->
+    
+      <div class="money-like">
+        <div class="reward-btn">
+          赏
+          <span class="money-code">
+            <span class="alipay-code">
+              <div class="code-image"></div>
+              <b>使用支付宝打赏</b>
+            </span>
+            <span class="wechat-code">
+              <div class="code-image"></div>
+              <b>使用微信打赏</b>
+            </span>
+          </span>
+        </div>
+        <p class="notice">若你觉得我的文章对你有帮助，欢迎点击上方按钮对我打赏</p>
+      </div>
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    <div class="qrcode">
+      <canvas id="share-qrcode"></canvas>
+      <p class="notice">扫描二维码，分享此文章</p>
+    </div>
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://yoursite.com/2018/03/12/GCD源码分析之dispatch_group/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+     // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+        
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+
+    // gitment
+    var gitmentConfig = "cocoa-chen";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "GCD源码分析之dispatch_group",
+        owner: "cocoa-chen",
+        repo: "cocoa_chen.github.io",
+        oauth: {
+          client_id: "b9855388fb8c8a2af742",
+          client_secret: "1122660f91f5cb724aa3cbdecddd015d9657954f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  })();
+</script>
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2018 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+<script src="/js/script.js"></script>
+  </body>
+</html>
