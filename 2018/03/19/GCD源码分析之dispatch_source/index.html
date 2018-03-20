@@ -153,6 +153,8 @@
 <p>1、循环引用：因为dispatch_source_set_event_handler回调是个block，在添加到source的链表上时会执行copy并被source强引用，如果block里持有了self，self又持有了source的话，就会引起循环引用。正确的方法是使用weak+strong或者提前调用dispatch_source_cancel取消timer。</p>
 <p>2、dispatch_resume和dispatch_suspend调用次数需要平衡，如果重复调用dispatch_resume则会崩溃,因为重复调用会让dispatch_resume代码里if分支不成立，从而执行了DISPATCH_CLIENT_CRASH(“Over-resume of an object”)导致崩溃。</p>
 <p>3、source在suspend状态下，如果直接设置source = nil或者重新创建source都会造成crash。正确的方式是在resume状态下调用dispatch_source_cancel(source)后再重新创建。</p>
+<h3 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h3><p>通过阅读GCD的源码还是学到了很多知识，也加深了工作中对GCD的使用和理解,希望通过GCD源码解析的文章和大家一起探讨相互学习。</p>
+<p>最后打个广告，有想来滴滴顺风车一起工作学习的小伙伴请发简历到chenaibin@didichuxing.com，期待和优秀的你一起共事!</p>
 </section>
     <!-- Tags START -->
     
