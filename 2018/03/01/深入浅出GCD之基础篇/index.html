@@ -125,7 +125,15 @@
 <h3 id="GCD介绍"><a href="#GCD介绍" class="headerlink" title="GCD介绍"></a>GCD介绍</h3><p>Grand Central Dispatch(GCD)是Apple推出的一套多线程解决方案，它拥有系统级的线程管理机制，开发者不需要再管理线程的生命周期，只需要关注于要执行的任务即可。</p>
 <p>本系列文章会从源码层面分析GCD的原理，总结GCD的用法和需要注意的地方，因此后续的文章都会从使用篇-&gt;原理篇-&gt;总结篇来讲，不太关心原理的可重点看下开头的<code>使用篇</code>和结尾的<code>总结篇</code>。</p>
 <p>GCD的源码libdispatch版本很多，源代码风格各版本都有不同，但大体逻辑没有太大变化。libdispatch的源码下载地址<a href="https://opensource.apple.com/tarballs/libdispatch/" target="_blank" rel="noopener">在这里</a>,我选择阅读的版本是<code>libdispatch-339.92.1</code>。</p>
-<h3 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h3><p>阅读GCD的源码之前，先了解一些相关知识，方便后面的理解。</p>
+<h3 id="文章列表"><a href="#文章列表" class="headerlink" title="文章列表"></a>文章列表</h3><p>本系列文章会分成以下几篇，对某篇感兴趣的可直接点击链接查看</p>
+<ul>
+<li><a href="http://cocoa-chen.github.io/2018/03/05/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_queue/" target="_blank" rel="noopener">深入浅出GCD之dispatch_queue</a></li>
+<li><a href="http://cocoa-chen.github.io/2018/03/08/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_semaphore/" target="_blank" rel="noopener">深入浅出GCD之dispatch_semaphore</a></li>
+<li><a href="http://cocoa-chen.github.io/2018/03/12/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_group/" target="_blank" rel="noopener">深入浅出GCD之dispatch_group</a></li>
+<li><a href="http://cocoa-chen.github.io/2018/03/15/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_once/" target="_blank" rel="noopener">深入浅出GCD之dispatch_once</a></li>
+<li><a href="http://cocoa-chen.github.io/2018/03/19/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_source/" target="_blank" rel="noopener">深入浅出GCD之dispatch_source</a></li>
+</ul>
+<h3 id="GCD基础知识"><a href="#GCD基础知识" class="headerlink" title="GCD基础知识"></a>GCD基础知识</h3><p>在阅读GCD的源码之前，我们先了解一些相关知识，方便后面的理解。</p>
 <h5 id="DISPATCH-DECL"><a href="#DISPATCH-DECL" class="headerlink" title="DISPATCH_DECL"></a>DISPATCH_DECL</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#define DISPATCH_DECL(name) typedef struct name##_s *name##_t</span><br></pre></td></tr></table></figure>
 <p>GCD中的变量大多使用了这个宏，比如<code>DISPATCH_DECL(dispatch_queue)</code>展开后是</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">typedef struct dispatch_queue_s *dispatch_queue_t；</span><br></pre></td></tr></table></figure>
