@@ -115,7 +115,7 @@
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2018/03/19/GCD源码分析之dispatch_source/">GCD源码分析之dispatch_source</a>
+        <a href="/2018/03/19/深入浅出GCD之dispatch_source/">深入浅出GCD之dispatch_source</a>
       </h2>
       <p class="article-date">March 19, 2018</p>
       
@@ -131,12 +131,12 @@
 概述Dispatch Source是BSD系统内核惯有功能kqueue的包装，kqueue是在XNU内核中发生各种事件时，在应用程序编程方执行处理的技术。它的CPU负荷非常小，尽量不占用资源。当事件发生时，Dispatch Source会在指定的Dispatch Queue中执行事件的处理 ...
         
       </div>
-      <a class="more" href="/2018/03/19/GCD源码分析之dispatch_source/">Read more</a>
+      <a class="more" href="/2018/03/19/深入浅出GCD之dispatch_source/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2018/03/15/GCD源码分析之dispatch_once/">GCD源码分析之dispatch_once</a>
+        <a href="/2018/03/15/深入浅出GCD之dispatch_once/">深入浅出GCD之dispatch_once</a>
       </h2>
       <p class="article-date">March 15, 2018</p>
       
@@ -149,16 +149,16 @@
       <div class="article-summary">
         
           
-前言dispatch_once的代码比较简单也比较简短，下面来看一下底层实现。
-dispatch_once123456789//invoke是指触发block的具体实现，感兴趣的可以看一下Block_layout的结构体#define _dispatch_Block_invoke(bb)  ...
+概述dispatch_once能保证任务只会被执行一次，即使同时多线程调用也是线程安全的。常用于创建单例、swizzeld method等功能。它的功能比较简单，接下来看下使用方法和具体的原理。
+使用篇1234static dispatch_once_t onceToken;dispatc ...
         
       </div>
-      <a class="more" href="/2018/03/15/GCD源码分析之dispatch_once/">Read more</a>
+      <a class="more" href="/2018/03/15/深入浅出GCD之dispatch_once/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2018/03/12/GCD源码分析之dispatch_group/">GCD源码分析之dispatch_group</a>
+        <a href="/2018/03/12/深入浅出GCD之dispatch_group/">深入浅出GCD之dispatch_group</a>
       </h2>
       <p class="article-date">March 12, 2018</p>
       
@@ -171,19 +171,19 @@ dispatch_once123456789//invoke是指触发block的具体实现，感兴趣的可
       <div class="article-summary">
         
           
-概述dispatch_group可以将GCD的任务归并到一个组里来执行，同时可以监听组里所有任务的执行情况。这里分析一下dispatch_group的底层实现。有以下几个主要的API：
+概述dispatch_group可以将GCD的任务合并到一个组里来管理，也可以同时监听组里所有任务的执行情况。主要的API有以下几个,先看一下Dispatch Group的具体使用。
 
 dispatch_group_create
 dispatch_group_enter
-dispatch ...
+dispatch_ ...
         
       </div>
-      <a class="more" href="/2018/03/12/GCD源码分析之dispatch_group/">Read more</a>
+      <a class="more" href="/2018/03/12/深入浅出GCD之dispatch_group/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2018/03/08/GCD源码分析之dispatch_semaphore/">GCD源码分析之dispatch_semaphore</a>
+        <a href="/2018/03/08/深入浅出GCD之dispatch_semaphore/">深入浅出GCD之dispatch_semaphore</a>
       </h2>
       <p class="article-date">March 8, 2018</p>
       
@@ -196,17 +196,16 @@ dispatch ...
       <div class="article-summary">
         
           
-概述关于信号量的使用比较简单，主要的API就三个，create、wait和signal,常用来保护资源访问的安全性。下面来分析一下dispatch_semaphore的底层实现。
-dispatch_semaphore_tdispatch_semaphore_s的机构体：
-123456789 ...
+概述Dispatch Semaphore是持有计数的信号，该信号是多线程编程中的计数类型信号。信号类似于过马路时的手旗，可以通过时举起手旗，不可通过时放下手旗。而在Dispatch Semaphore中使用了计数来实现该功能。计数为0时等待，计数为1或者大于1时放行。
+信号量的使用比较简单 ...
         
       </div>
-      <a class="more" href="/2018/03/08/GCD源码分析之dispatch_semaphore/">Read more</a>
+      <a class="more" href="/2018/03/08/深入浅出GCD之dispatch_semaphore/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2018/03/05/GCD源码分析之dispatch_queue/">GCD源码分析之dispatch_queue</a>
+        <a href="/2018/03/05/深入浅出GCD之dispatch_queue/">深入浅出GCD之dispatch_queue</a>
       </h2>
       <p class="article-date">March 5, 2018</p>
       
@@ -219,17 +218,16 @@ dispatch_semaphore_tdispatch_semaphore_s的机构体：
       <div class="article-summary">
         
           
-概述关于queue的数据结构和常用定义已经在上篇讲过了，这篇讲一下queue主要的API和相关逻辑。
-dispatch_get_global_queuedispatch_get_global_queue在日常的开发中占有很大的比重，先看一下它的源码：
-123456789dispatch_q ...
+概述dispatch_queue可以说是GCD编程中使用频率最高的API，本篇文章主要讲一下queue的相关用法和原理，关于queue的数据结构和常用定义见上篇文章。
+使用篇当我们处理耗时操作时，比如读取数据库、请求网络数据，为了避免这些耗时操作卡住UI,可将耗时任务放到子线程中，执行完成 ...
         
       </div>
-      <a class="more" href="/2018/03/05/GCD源码分析之dispatch_queue/">Read more</a>
+      <a class="more" href="/2018/03/05/深入浅出GCD之dispatch_queue/">Read more</a>
     </article>
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2018/03/01/GCD源码分析-前言/">GCD源码分析-前言</a>
+        <a href="/2018/03/01/深入浅出GCD之基础篇/">深入浅出GCD之基础篇</a>
       </h2>
       <p class="article-date">March 1, 2018</p>
       
@@ -242,10 +240,11 @@ dispatch_get_global_queuedispatch_get_global_queue在日常的开发中占有很
       <div class="article-summary">
         
           
-背景Grand Central Dispatch(GCD)是Apple推出的一套多线程解决方案，极大的方便了开发者进行多线程编程。通过阅读libdispatch的源码可以更好的帮助我们理解和使用GCD。libdispatch的源码版本很多，源代码风格各版本都有不同，但大体逻辑没有太大变化。 ...
+GCD介绍Grand Central Dispatch(GCD)是Apple推出的一套多线程解决方案，它拥有系统级的线程管理机制，开发者不需要再管理线程的生命周期，只需要关注于要执行的任务即可。
+本系列文章会从源码层面分析GCD的原理，总结GCD的用法和需要注意的地方，因此后续的文章都会从 ...
         
       </div>
-      <a class="more" href="/2018/03/01/GCD源码分析-前言/">Read more</a>
+      <a class="more" href="/2018/03/01/深入浅出GCD之基础篇/">Read more</a>
     </article>
   
     <article class="article-card">
