@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="cocoa_chen&#39;s blog">
+  <meta name="keyword" content="objective-C, cocoa_chen, Swift">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      cocoa_chen
+    
+  </title>
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+  
+<script src="/js/qrious.js"></script>
+<script src="/js/gitment.js"></script>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>cocoa_chen</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link active">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link mobile-active">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <main class="app-body">
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2020/08/20/AVAudioSession%E9%9F%B3%E9%A2%91%E9%85%8D%E7%BD%AE%E5%B0%8F%E6%8A%80%E5%B7%A7/">AVAudioSession音频配置小技巧</a>
+      </h2>
+      <p class="article-date">August 20, 2020</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          前言iOS在音频配置方面的核心逻辑在AVAudioSession，它用来管理多个App对音频硬件设备（麦克风，扬声器）的资源使用。这篇文章不是AVAudioSession的科普，如果你还不了解它，可以google下，会有很多文章专门介绍它。这里总结一些网络上不常见的音频配置技巧点，帮助你优化 ...
+        
+      </div>
+      <a class="more" href="/2020/08/20/AVAudioSession%E9%9F%B3%E9%A2%91%E9%85%8D%E7%BD%AE%E5%B0%8F%E6%8A%80%E5%B7%A7/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2020/07/20/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E5%88%86%E6%9E%90%E4%B9%8B%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">二进制文件分析之常用命令</a>
+      </h2>
+      <p class="article-date">July 20, 2020</p>
+      
+        
+  <a href="/tags#编译 iOS" >
+    <span class="tag-code">编译 iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          一、背景介绍最近新版本审核时被拒了，Apple给出的原因是使用到了Intents的功能，但是Info.plist中并未给出使用简介导致被拒。由于我们的App并不需要使用Intents等能力，所以需要排查是哪些第三方库引入的Intents.framework。下面将介绍在分析二进制文件时常用的 ...
+        
+      </div>
+      <a class="more" href="/2020/07/20/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E5%88%86%E6%9E%90%E4%B9%8B%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2020/07/13/iosCompile/">iOS 编译知识小结</a>
+      </h2>
+      <p class="article-date">July 13, 2020</p>
+      
+        
+  <a href="/tags#编译 iOS" >
+    <span class="tag-code">编译 iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          简介拖更很久了，今天水文一篇。简单介绍下iOS底层编译的相关知识，帮助我们充分理解了iOS编译的过程，相信会对我们后续的开发有一定帮助。
+源码到可执行文件流程首先看一下iOS代码是如何从源码变成可执行文件的，有助于我们了解程序从编译到运行的全流程
+
+编译器Clang会将源码XXX.m编译为目 ...
+        
+      </div>
+      <a class="more" href="/2020/07/13/iosCompile/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2020/02/26/opensourceEcho/">开源一款客户端研发调试用的桌面端工具：Echo</a>
+      </h2>
+      <p class="article-date">February 26, 2020</p>
+      
+        
+  <a href="/tags#Echo" >
+    <span class="tag-code">Echo</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          <p><a href="https://github.com/didi/echo" target="_blank" rel="noopener">Echo</a>是一款客户端的桌面端调试工具，旨在提高客户端的研发调试效率。目前已在<a href="https://github.com/didi/echo" target="_blank" rel="noopener">Github</a>开源，欢迎大家使用。</p>
+        
+      </div>
+      <a class="more" href="/2020/02/26/opensourceEcho/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2018/06/14/ioskai-fa-bi-ji-3/">iOS开发笔记 第三篇</a>
+      </h2>
+      <p class="article-date">June 14, 2018</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+目录
+自定义对象下标索引和键值索引
+在podspec中屏蔽nullablity相关警告
+待添加
+
+1.自定义对象下标索引和键值索引开发中封装一些工具类时，为了接口的简洁和功能的内聚，这时候可以考虑对工具类增加自定义的下标索引和键值索引功能。
+通过声明和实现以下方法来增加自定义键位下标到自定 ...
+        
+      </div>
+      <a class="more" href="/2018/06/14/ioskai-fa-bi-ji-3/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2018/03/19/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_source/">深入浅出GCD之dispatch_source</a>
+      </h2>
+      <p class="article-date">March 19, 2018</p>
+      
+        
+  <a href="/tags#GCD" >
+    <span class="tag-code">GCD</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+概述Dispatch Source是BSD系统内核惯有功能kqueue的包装，kqueue是在XNU内核中发生各种事件时，在应用程序编程方执行处理的技术。它的CPU负荷非常小，尽量不占用资源。当事件发生时，Dispatch Source会在指定的Dispatch Queue中执行事件的处 ...
+        
+      </div>
+      <a class="more" href="/2018/03/19/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_source/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2018/03/15/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_once/">深入浅出GCD之dispatch_once</a>
+      </h2>
+      <p class="article-date">March 15, 2018</p>
+      
+        
+  <a href="/tags#GCD" >
+    <span class="tag-code">GCD</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+
+概述dispatch_once能保证任务只会被执行一次，即使同时多线程调用也是线程安全的。常用于创建单例、swizzeld method等功能。它的功能比较简单，接下来看下使用方法和具体的原理。
+使用篇1234static dispatch_once_t onceToken;dispa ...
+        
+      </div>
+      <a class="more" href="/2018/03/15/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_once/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2018/03/12/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_group/">深入浅出GCD之dispatch_group</a>
+      </h2>
+      <p class="article-date">March 12, 2018</p>
+      
+        
+  <a href="/tags#GCD" >
+    <span class="tag-code">GCD</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+
+概述dispatch_group可以将GCD的任务合并到一个组里来管理，也可以同时监听组里所有任务的执行情况。主要的API有以下几个,先看一下Dispatch Group的具体使用。
+
+dispatch_group_create
+dispatch_group_enter
+dispatc ...
+        
+      </div>
+      <a class="more" href="/2018/03/12/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_group/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2018/03/08/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_semaphore/">深入浅出GCD之dispatch_semaphore</a>
+      </h2>
+      <p class="article-date">March 8, 2018</p>
+      
+        
+  <a href="/tags#GCD" >
+    <span class="tag-code">GCD</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+
+概述Dispatch Semaphore是持有计数的信号，该信号是多线程编程中的计数类型信号。信号类似于过马路时的手旗，可以通过时举起手旗，不可通过时放下手旗。而在Dispatch Semaphore中使用了计数来实现该功能。计数为0时等待，计数为1或者大于1时放行。
+信号量的使用比较 ...
+        
+      </div>
+      <a class="more" href="/2018/03/08/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_semaphore/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2018/03/05/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_queue/">深入浅出GCD之dispatch_queue</a>
+      </h2>
+      <p class="article-date">March 5, 2018</p>
+      
+        
+  <a href="/tags#GCD" >
+    <span class="tag-code">GCD</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+
+概述dispatch_queue可以说是GCD编程中使用频率最高的API，本篇文章主要讲一下queue的相关用法和原理，关于queue的数据结构和常用定义见上篇文章。
+使用篇当我们处理耗时操作时，比如读取数据库、请求网络数据，为了避免这些耗时操作卡住UI,可将耗时任务放到子线程中，执行 ...
+        
+      </div>
+      <a class="more" href="/2018/03/05/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BAGCD%E4%B9%8Bdispatch_queue/">Read more</a>
+    </article>
+  
+
+  
+    <div class="guide-pager">
+  
+    <a class="unvisible" href="/"><span class="page-arrow">←</span> Prev</a>
+  
+  
+    <a href="/page/2/">Next<span class="page-arrow"> →</span></a>
+  
+</div>
+  
+</main>
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2020 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

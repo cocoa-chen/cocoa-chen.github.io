@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="cocoa_chen&#39;s blog">
+  <meta name="keyword" content="objective-C, cocoa_chen, Swift">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      cocoa_chen
+    
+  </title>
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+  
+<script src="/js/qrious.js"></script>
+<script src="/js/gitment.js"></script>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>cocoa_chen</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link active">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link mobile-active">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <main class="app-body">
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2015/05/12/lun-boolvaluede-zhong-yao-xing/">论boolValue的重要性</a>
+      </h2>
+      <p class="article-date">May 12, 2015</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+背景今天遇到了一个旧项目中的bug，排查半天发现是Number转换成Bool后返回的值不确定导致的。以下是相关的测试代码:
+123456_testDict &#x3D; [NSMutableDictionary dictionary];[_testDict setObject:[NSNu ...
+        
+      </div>
+      <a class="more" href="/2015/05/12/lun-boolvaluede-zhong-yao-xing/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2015/04/03/ios7zi-ding-yi-uiviewcontrollerqie-huan-xiao-guo/">iOS7自定义UIViewController切换效果</a>
+      </h2>
+      <p class="article-date">April 3, 2015</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+iOS7自定义ViewController动画切换主要知识点，如图所示：
+iOS7之后的API添加了很多新功能，其中一个很有趣的功能就是自定义UIViewController的过渡效果。它降低了耦合性，更好的分离功能代码，同时也可以很方便的做出令人眼前一亮的效果。
+要实现自定义的过渡效果 ...
+        
+      </div>
+      <a class="more" href="/2015/04/03/ios7zi-ding-yi-uiviewcontrollerqie-huan-xiao-guo/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2014/12/15/autolayoutzhi-masonryjian-jie/">AutoLayout之Masonry简介</a>
+      </h2>
+      <p class="article-date">December 15, 2014</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+Masonry是一个轻量级的布局框架，它提供了更加方便和友好的API来替代NSLayoutConstraint进行自动布局（AutoLayout）编程，使得在手写代码布局时更加轻松方便。
+使用简介首先做一个简单的布局，创建一个视图距离父视图的各边界为10像素。我们会用NSLayoutCo ...
+        
+      </div>
+      <a class="more" href="/2014/12/15/autolayoutzhi-masonryjian-jie/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2014/11/29/iosji-qiao/">iOS开发的一些小技巧</a>
+      </h2>
+      <p class="article-date">November 29, 2014</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+前言在iOS开发中有一些小技巧可以帮助快速开发，在这里记录下来以便以后自己复习与使用(更新中…)
+
+KVC技巧
+registerDefaults:
+UILabel的自适应字体大小
+用NSExpression计算数学结果
+获取逆序的Array数组
+
+一、KVC技巧在KVC编程中，value ...
+        
+      </div>
+      <a class="more" href="/2014/11/29/iosji-qiao/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2014/11/25/yi-ni-ke-neng-bu-zhi-dao-de-objective-cji-qiao/">(译)你可能不知道的Objective-C技巧</a>
+      </h2>
+      <p class="article-date">November 25, 2014</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+如果你在阅读这些文章，你大概已经对iOS开发的基础知识有了很好的掌握，但还是有一些小的技巧和实践是很多开发者不熟悉的，即使是已经有几年开发经验的人。在这一章中，你会学到一些很重要的提示和技巧，但这还远远不够，你需要多多练习以使得你的代码更加健壮以及可维护性更好。
+
+注：本文翻译自《iOS ...
+        
+      </div>
+      <a class="more" href="/2014/11/25/yi-ni-ke-neng-bu-zhi-dao-de-objective-cji-qiao/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2014/11/20/iphone6he-plusgua-pei-bei-wang-lu/">iPhone6和Plus适配备忘录</a>
+      </h2>
+      <p class="article-date">November 20, 2014</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+1.旧工程添加Launch Screen适配iPhone6/Plus如果是Xcode6之前的工程直接在6/Plus上运行，默认会是“兼容模式”，系统会等比放大，当然显示效果会有些模糊。这种情况下获取到的设备分辨率和iPhone5下一样。先简单介绍下如何开启iPhone6和iPhone6  ...
+        
+      </div>
+      <a class="more" href="/2014/11/20/iphone6he-plusgua-pei-bei-wang-lu/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2014/11/05/yong-runtimepan-duan-dui-xiang-shi-fou-shi-xian-liao-fu-lei-de-fang-fa/">用runtime判断对象是否实现了父类的方法</a>
+      </h2>
+      <p class="article-date">November 5, 2014</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+
+前两天朋友问了个问题，如何判断一个方法是由这个对象自己实现了，还是直接继承的父类实现。看了下，用respondsToSelector是无法判断出来的，需要用到runtime的东西。所以又顺便看了下runtime的东西并在此记录一下。
+1.class_copyMethodList1234 ...
+        
+      </div>
+      <a class="more" href="/2014/11/05/yong-runtimepan-duan-dui-xiang-shi-fou-shi-xian-liao-fu-lei-de-fang-fa/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2014/10/27/yong-nsscannerpan-duan-stringnei-rong-shi-fou-wei-zheng-xing-huo-zhe-fu-dian-xing-shu-ju/">用NSScanner判断String内容是否为整型或者浮点型数据</a>
+      </h2>
+      <p class="article-date">October 27, 2014</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+
+在开发的过程中会遇到各种各样的需求,比如需要判断一个NSString的变量内容是否为Int数据或者Float数据,这时候可以用NSScanner来简单的判断下
+1.判断NSString是否为int内容12345678- (BOOL)isPureInt:(NSString *)strin ...
+        
+      </div>
+      <a class="more" href="/2014/10/27/yong-nsscannerpan-duan-stringnei-rong-shi-fou-wei-zheng-xing-huo-zhe-fu-dian-xing-shu-ju/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2014/10/24/gcdbian-cheng-de-jian-dan-yong-fa/">GCD编程的简单用法</a>
+      </h2>
+      <p class="article-date">October 24, 2014</p>
+      
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+
+什么是GCDGrand Central Dispatch(GCD)是苹果在OS X Snow Leopard和IOS4后引入的新的多线程编程功能，配合Block可以很简洁高效的处理多线程编程。
+GCD应用示例
+Dispatch Queue
+dispatch_after函数
+dispat ...
+        
+      </div>
+      <a class="more" href="/2014/10/24/gcdbian-cheng-de-jian-dan-yong-fa/">Read more</a>
+    </article>
+  
+
+  
+    <div class="guide-pager">
+  
+    <a href="/page/2/"><span class="page-arrow">← </span>Prev</a>
+  
+  
+    <a class="unvisible" href="/">Next <span class="page-arrow">→</span></a>
+  
+</div>
+  
+</main>
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2020 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="cocoa_chen&#39;s blog">
+  <meta name="keyword" content="objective-C, cocoa_chen, Swift">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      使用NSURLProtocol切换开发环境 | cocoa_chen
+    
+  </title>
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+  
+<script src="/js/qrious.js"></script>
+<script src="/js/gitment.js"></script>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>cocoa_chen</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>使用NSURLProtocol切换开发环境</h2>
+  <p class="post-date">2016-03-20</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><a id="more"></a>
+
+<p><strong>在项目开发过程中，经常需要来回的切换开发环境(正式环境+测试环境)，这里可以使用NSUserDefaults来判断当前的开发环境并做对应的处理，但是如果功能分支比较多可能会部署好几套服务器，此时可以使用NSURLProtocol方便的解决开发环境的切换功能。</strong></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>NSURLProtocol可以让我们重定义<a href="https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/URLLoadingSystem/URLLoadingSystem.html" target="_blank" rel="noopener">URL加载系统</a>(URL Loading System)，register自定义的NSURLProtocol之后，我们可以对网络请求进行处理，完成下述行为：</p>
+<ul>
+<li>拦截NSURLConnection或NSURLSession的网络请求</li>
+<li>忽略网络请求而返回本地缓存数据</li>
+<li>HTTP Mock功能</li>
+<li>其他的全局网络请求设置</li>
+</ul>
+<p>这里主要介绍如何自定义NSURLProtocol来实现开发环境的切换功能</p>
+<h3 id="创建NSURLProtocol并注册"><a href="#创建NSURLProtocol并注册" class="headerlink" title="创建NSURLProtocol并注册"></a>创建NSURLProtocol并注册</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@interface CCHTTPProtocol : NSURLProtocol</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+
+<p>在- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions方法中注册我们自定义的NSURLProtocol并设置项目中的开发环境，这里使用NSUserDefaults来模拟，你也可以使用Plist文件来加载。代码如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions &#123;</span><br><span class="line">    &#x2F;&#x2F; Override point for customization after application launch.</span><br><span class="line">#warning 配置开发环境,这里仅添加两种，可以更换或添加自己项目中的环境</span><br><span class="line">    NSDictionary *serverDict &#x3D; @&#123;@&quot;production&quot;: @&#123;@&quot;host&quot;: @&quot;www.yourAppUrl.com&quot;,@&quot;port&quot;:@&quot;80&quot;&#125;,</span><br><span class="line">                                 @&quot;dev&quot;: @&#123;@&quot;host&quot;: @&quot;www.dev.com&quot;,@&quot;port&quot;:@&quot;8080&quot;&#125;&#125;;</span><br><span class="line">    [[NSUserDefaults standardUserDefaults] setValue:serverDict forKey:@&quot;ccServerInfo&quot;];</span><br><span class="line">    NSString *currentServer &#x3D; [[NSUserDefaults standardUserDefaults] valueForKey:@&quot;currentServer&quot;];</span><br><span class="line">    if (!currentServer || ![currentServer length]) &#123;</span><br><span class="line">        &#x2F;&#x2F;默认保存正式环境</span><br><span class="line">        [[NSUserDefaults standardUserDefaults] setValue:@&quot;production&quot; forKey:@&quot;currentServer&quot;];</span><br><span class="line">    &#125;</span><br><span class="line">    [[NSUserDefaults standardUserDefaults] synchronize];</span><br><span class="line">    &#x2F;&#x2F;注册URLProtocol</span><br><span class="line">    [NSURLProtocol registerClass:[CCHTTPProtocol class]];</span><br><span class="line">    return YES;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="实现自定义的NSURLProtocol"><a href="#实现自定义的NSURLProtocol" class="headerlink" title="实现自定义的NSURLProtocol"></a>实现自定义的NSURLProtocol</h3><p>子类时必须实现的方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;定义标记key和项目接口中的特定字段</span><br><span class="line">static NSString *const kHTTPURLProtocolHandledKey &#x3D; @&quot;ccURLProtocolHandledKey&quot;;</span><br><span class="line">static NSString *const kAPIFilterPath &#x3D; @&quot;yourProject&#x2F;api&quot;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">+ (BOOL)canInitWithRequest:(NSURLRequest *)request</span><br><span class="line">&#123;</span><br><span class="line">    NSString *scheme &#x3D; [[request URL] scheme];</span><br><span class="line">    NSString *urlString &#x3D; [[request URL] absoluteString];</span><br><span class="line">    &#x2F;&#x2F;只处理http和https请求,并且判断是否包含网络请求中的特定字符串，如果包含则是自己的服务器，替换请求</span><br><span class="line">    if (([scheme caseInsensitiveCompare:@&quot;http&quot;] &#x3D;&#x3D; NSOrderedSame || [scheme caseInsensitiveCompare:@&quot;https&quot;] &#x3D;&#x3D; NSOrderedSame) &amp;&amp; [urlString containsString:kAPIFilterPath]) &#123;</span><br><span class="line">        &#x2F;&#x2F;看看是否已经处理过了，防止无限循环</span><br><span class="line">        if ([NSURLProtocol propertyForKey:kHTTPURLProtocolHandledKey inRequest:request]) &#123;</span><br><span class="line">            return NO;</span><br><span class="line">        &#125;</span><br><span class="line">        return YES;</span><br><span class="line">    &#125;</span><br><span class="line">    return NO;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个方法指明你是否要处理request，如果不打算处理的话返回NO就行，系统会使用默认的URL加载系统处理request，如果返回YES,<code>URL Loading System</code>会将request的处理操作交给你的urlProtocol。上面的代码我们只处理了http和https请求(你也可以拦截ftp等请求),通常我们的接口中都会包含特定的字符串，比如我这里拦截的kAPIFilterPath，将它设置为你项目中对应的接口字段即可。还有一点需要注意，我们不能总是返回YES，这样会导致无限循环，我们可以通过<code>+ (void)setProperty:(id)value forKey:(NSString *)key inRequest:(NSMutableURLRequest *)request</code>方法来标记request已经被处理过，如果通过<code>+ (nullable id)propertyForKey:(NSString *)key inRequest:(NSURLRequest *)request</code>方法获取到已经处理过该request，则返回NO。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+ (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request</span><br><span class="line">&#123;</span><br><span class="line">    return request;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个方法返回标准化的request，通常都是直接返回request，当然也可以在修改request，比如替换host，添加自定义的header信息等等，这里我们直接返回request不尽兴处理</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+ (BOOL)requestIsCacheEquivalent:(NSURLRequest *)a toRequest:(NSURLRequest *)b</span><br><span class="line">&#123;</span><br><span class="line">    return [super requestIsCacheEquivalent:a toRequest:b];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个方法主要是用来判断两个request是否相同，如果相同的话可以使用缓存数据，通常调用父类的实现即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">- (void)startLoading</span><br><span class="line">&#123;</span><br><span class="line">    NSMutableURLRequest *request &#x3D; [[self request] mutableCopy];</span><br><span class="line">    &#x2F;&#x2F;自定义request，修改Host和Port</span><br><span class="line">    request &#x3D; [self redirectHostAndPortInRequest:request];</span><br><span class="line">    &#x2F;&#x2F;标示request已经处理过了，防止无限循环</span><br><span class="line">    [NSURLProtocol setProperty:@(YES) forKey:kHTTPURLProtocolHandledKey inRequest:request];</span><br><span class="line">    self.connection &#x3D; [NSURLConnection connectionWithRequest:request delegate:self];</span><br><span class="line">&#125;</span><br><span class="line">- (void)stopLoading</span><br><span class="line">&#123;</span><br><span class="line">    [self.connection cancel];</span><br><span class="line">    self.connection &#x3D; nil;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这两个方法是loading开始和停止的地方，我们可以在这里标记已处理的request并做对应的处理操作。这里我们按照下面的代码修改request的Host和Port来达到切换环境的功能:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">#pragma mark - Helper</span><br><span class="line">&#x2F;&#x2F;修改请求的Host和Port</span><br><span class="line">- (NSMutableURLRequest *)redirectHostAndPortInRequest:(NSMutableURLRequest *)request</span><br><span class="line">&#123;</span><br><span class="line">    if ([request.URL host].length &#x3D;&#x3D; 0) &#123;</span><br><span class="line">        return request;</span><br><span class="line">    &#125;</span><br><span class="line">    NSString *originURLString &#x3D; [request.URL absoluteString];</span><br><span class="line">    NSString *originHost &#x3D; [request.URL host];</span><br><span class="line">    NSNumber *originPort &#x3D; [request.URL port];</span><br><span class="line">    NSRange hostRange &#x3D; [originURLString rangeOfString:originHost];</span><br><span class="line">    if (hostRange.location &#x3D;&#x3D; NSNotFound) &#123;</span><br><span class="line">        return request;</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;读取当前的开发环境,这里暂用NSUserDefaults做效果</span><br><span class="line">    NSDictionary *serverInfo &#x3D; [[NSUserDefaults standardUserDefaults] valueForKey:@&quot;ccServerInfo&quot;];</span><br><span class="line">    NSString *currentServer &#x3D; [[NSUserDefaults standardUserDefaults] valueForKey:@&quot;currentServer&quot;];</span><br><span class="line">    NSString *host &#x3D; serverInfo[currentServer][@&quot;host&quot;];</span><br><span class="line">    NSString *port &#x3D; serverInfo[currentServer][@&quot;port&quot;];</span><br><span class="line">    &#x2F;&#x2F;重定向请求Host</span><br><span class="line">    NSString *urlString &#x3D; [originURLString stringByReplacingCharactersInRange:hostRange withString:host];</span><br><span class="line">    &#x2F;&#x2F;替换端口号</span><br><span class="line">    if (originPort) &#123;</span><br><span class="line">        urlString &#x3D; [urlString stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@&quot;%@&quot;,originPort] withString:port];</span><br><span class="line">    &#125;</span><br><span class="line">    &#x2F;&#x2F;修改request的URL</span><br><span class="line">    NSURL *url &#x3D; [NSURL URLWithString:urlString];</span><br><span class="line">    request.URL &#x3D; url;</span><br><span class="line">    return request;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="实现NSURLConnectionDelegate和NSURLConnectionDataDelegate"><a href="#实现NSURLConnectionDelegate和NSURLConnectionDataDelegate" class="headerlink" title="实现NSURLConnectionDelegate和NSURLConnectionDataDelegate"></a>实现NSURLConnectionDelegate和NSURLConnectionDataDelegate</h3><p>因为我们拦截了上面的request，所以需要使用NSURLProtocol中的client这个对象将网络请求的消息返回给<code>URL Loading System</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#pragma mark - NSURLConnectionDelegate</span><br><span class="line">- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response</span><br><span class="line">&#123;</span><br><span class="line">    [self.client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];</span><br><span class="line">&#125;</span><br><span class="line">- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data</span><br><span class="line">&#123;</span><br><span class="line">    [self.client URLProtocol:self didLoadData:data];</span><br><span class="line">&#125;</span><br><span class="line">- (void)connectionDidFinishLoading:(NSURLConnection *)connection</span><br><span class="line">&#123;</span><br><span class="line">    [self.client URLProtocolDidFinishLoading:self];</span><br><span class="line">&#125;</span><br><span class="line">- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error</span><br><span class="line">&#123;</span><br><span class="line">    [self.client URLProtocol:self didFailWithError:error];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过上面的代码，我们已经实现了开发环境切换的功能，上述功能的完整代码点这里下载<a href="https://github.com/cocoa-chen/NSURLProtocolDemo" target="_blank" rel="noopener">Demo</a></p>
+<p>上述代码是基于NSURLConnection的，NSURLSession同样支持，不过需要改成对应的NSURLSession代码。</p>
+<h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接:"></a>参考链接:</h3><ul>
+<li><a href="https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/URLLoadingSystem/URLLoadingSystem.html" target="_blank" rel="noopener">https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/URLLoadingSystem/URLLoadingSystem.html</a></li>
+<li><a href="https://www.raywenderlich.com/76735/using-nsurlprotocol-swift" target="_blank" rel="noopener">https://www.raywenderlich.com/76735/using-nsurlprotocol-swift</a></li>
+</ul>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- 打赏 START -->
+    
+      <div class="money-like">
+        <div class="reward-btn">
+          赏
+          <span class="money-code">
+            <span class="alipay-code">
+              <div class="code-image"></div>
+              <b>使用支付宝打赏</b>
+            </span>
+            <span class="wechat-code">
+              <div class="code-image"></div>
+              <b>使用微信打赏</b>
+            </span>
+          </span>
+        </div>
+        <p class="notice">若你觉得我的文章对你有帮助，欢迎点击上方按钮对我打赏</p>
+      </div>
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    <div class="qrcode">
+      <canvas id="share-qrcode"></canvas>
+      <p class="notice">扫描二维码，分享此文章</p>
+    </div>
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://yoursite.com/2016/03/20/li-yong-nsurlprotocolqie-huan-kai-fa-huan-jing/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+     // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+        
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+
+    // gitment
+    var gitmentConfig = "cocoa-chen";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "使用NSURLProtocol切换开发环境",
+        owner: "cocoa-chen",
+        repo: "cocoa-chen.github.io",
+        oauth: {
+          client_id: "e12c4d16bb2a811822a7",
+          client_secret: "8fa9d6ce27d985bc1ed6027ee666305208a5e86e"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  })();
+</script>
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2020 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

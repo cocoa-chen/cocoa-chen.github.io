@@ -16,14 +16,18 @@
   <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
   <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
   <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
+  
+<link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/css/plugins/gitment.css">
+
   <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
   <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
   <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
-  <script src="/js/qrious.js"></script>
+  
+<script src="/js/qrious.js"></script>
 <script src="/js/gitment.js"></script>
-</head>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
 <div class="wechat-share">
   <img src="/css/images/logo.png" />
 </div>
@@ -123,9 +127,10 @@
   <article class="post-article">
     <section class="markdown-content"><p><a href="https://github.com/didi/echo" target="_blank" rel="noopener">Echo</a>是一款客户端的桌面端调试工具，旨在提高客户端的研发调试效率。目前已在<a href="https://github.com/didi/echo" target="_blank" rel="noopener">Github</a>开源，欢迎大家使用。</p>
 <a id="more"></a>
+
 <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>客户端在研发调试阶段都会集成一些debug工具，用来显示App的网络请求、业务逻辑等调试信息，以辅助RD和QA发现并定位问题。目前大部分的debug工具都是内置在App中，但由于手机屏幕小以及我们需要在App和debug工具之间频繁切换等情况，有时候调试体验并不太好。</p>
 <p>基于现有的一些问题和团队需求，我们开源的这款<strong>Echo</strong>是一款简单易用、插件化易扩展、大屏显示和操作的桌面端工具，可以实时查看App各类数据（网络请求、日志、埋点等），也可以无须改动代码快速修改预览App的效果。</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/2/26/17080be02515edb4?w=1600&amp;h=1100&amp;f=jpeg&amp;s=201005" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/2/26/17080be02515edb4?w=1600&h=1100&f=jpeg&s=201005" alt=""></p>
 <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>Echo已支持的功能模块主要分为四部分：</p>
 <ul>
 <li><strong>基础功能</strong>：网络请求、NSUserDefaults查看修改、日志查看、Crash查看、GPS模拟、通知查看</li>
@@ -141,26 +146,31 @@
 <li><strong>高扩展性</strong>：插件和模块机制可以方便我们快速添加新功能</li>
 </ul>
 <h2 id="如何使用"><a href="#如何使用" class="headerlink" title="如何使用"></a>如何使用</h2><p>1、添加CocoaPods依赖</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod &apos;EchoSDK&apos;, :configurations =&gt; [&quot;Debug&quot;]</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod &#39;EchoSDK&#39;, :configurations &#x3D;&gt; [&quot;Debug&quot;]</span><br></pre></td></tr></table></figure>
+
 <p>2、在App启动时添加以下代码</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#ifdef DEBUG</span><br><span class="line">#import &lt;EchoSDK/ECOClient.h&gt;</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions &#123;</span><br><span class="line">    #ifdef DEBUG</span><br><span class="line">    	[[ECOClient sharedClient] start];</span><br><span class="line">    #endif</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#ifdef DEBUG</span><br><span class="line">#import &lt;EchoSDK&#x2F;ECOClient.h&gt;</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions &#123;</span><br><span class="line">    #ifdef DEBUG</span><br><span class="line">    	[[ECOClient sharedClient] start];</span><br><span class="line">    #endif</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>3、启动Echo的Mac端</p>
 <p>手动build工程的话，可以在/Mac目录下执行<code>pod install</code>之后，启动<code>Echo.xcworkspace</code>并运行。</p>
 <h2 id="扩展性"><a href="#扩展性" class="headerlink" title="扩展性"></a>扩展性</h2><h4 id="模板"><a href="#模板" class="headerlink" title="模板"></a>模板</h4><p>在Echo的mac客户端中，内置了List-Detail、Outline和H5三个通用模板，满足了大部分业务插件的显示需求，即使不懂Mac开发也能快速的接入。<br>对于熟悉Mac开发的同学或者有自定义要求的同学，可以构建自己的插件模板显示，接入时只需要将模板名称与UI在Echo中做映射即可。</p>
 <p><strong>List-Detail模板</strong>：适用于列表类型数据的展示，同时支持选中时展示详细的信息。日志、内存泄漏以及扩展一些业务功能时，用该模板展示比较适合。效果如下：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/2/26/17080be945a4bbf6?w=2208&amp;h=1560&amp;f=png&amp;s=485587" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/2/26/17080be945a4bbf6?w=2208&h=1560&f=png&s=485587" alt=""></p>
 <p><strong>Outline模板</strong>：适用于树形数据的展示，如NSUserDefaults功能就使用的该模板。效果如下：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/2/26/17080bee0aabab8a?w=2210&amp;h=1560&amp;f=png&amp;s=445793" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/2/26/17080bee0aabab8a?w=2210&h=1560&f=png&s=445793" alt=""></p>
 <p><strong>H5模板</strong>：适用于H5页面的展示和操作，如位置模拟功能就使用的H5模板。效果如下：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/2/26/17080bf15e357da8?w=2206&amp;h=1560&amp;f=png&amp;s=1150036" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/2/26/17080bf15e357da8?w=2206&h=1560&f=png&s=1150036" alt=""></p>
 <h4 id="插件"><a href="#插件" class="headerlink" title="插件"></a>插件</h4><p><strong>插件</strong></p>
 <p>Echo的每个能力在开发时都被抽象为一个插件，每个插件只需要关注要采集的数据及操作的响应即可，这样的设定便于我们快速的扩展新的功能。下面介绍如何快速的扩展一个新的插件：</p>
 <p>1、新建一个继承自ECOBasePlugin的插件类，同时在<code>init</code>方法中设置插件名称以及注册渲染的UI模板。</p>
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="keyword">void</span>)load &#123;</span><br><span class="line">    <span class="comment">//注册插件</span></span><br><span class="line">    [[ECOClient sharedClient] registerPlugin:[<span class="keyword">self</span> <span class="keyword">class</span>]];</span><br><span class="line">&#125;</span><br><span class="line">- (<span class="keyword">instancetype</span>)init &#123;</span><br><span class="line">    <span class="keyword">self</span> = [<span class="keyword">super</span> init];</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.name = <span class="string">@"日志"</span>;</span><br><span class="line">        [<span class="keyword">self</span> registerTemplate:ECOUITemplateType_ListDetail data:<span class="literal">nil</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>2、如果你想在SDK连接到Mac客户端时发送连接数据或其他功能参数，请覆写<code>device:didChangedAuthState:</code>方法：</p>
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//连接状态变更</span></span><br><span class="line">- (<span class="keyword">void</span>)device:(ECOChannelDeviceInfo *)device didChangedAuthState:(<span class="built_in">BOOL</span>)isAuthed &#123;</span><br><span class="line">    <span class="keyword">if</span> (isAuthed) &#123;</span><br><span class="line">        <span class="keyword">id</span> yourData = <span class="string">"要发送的信息"</span>;</span><br><span class="line">        !<span class="keyword">self</span>.deviceSendBlock ?: <span class="keyword">self</span>.deviceSendBlock(device, yourData);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>3、如果你想处理Mac客户端发送的命令，请覆写<code>didReceivedPacketData:</code>方法：</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#pragma mark - ECOBasePlugin methods</span></span><br><span class="line">- (<span class="keyword">void</span>)didReceivedPacketData:(<span class="keyword">id</span>)data &#123;</span><br><span class="line">    <span class="comment">// 在这里实现你自己的业务功能</span></span><br><span class="line">    <span class="built_in">NSDictionary</span> *dict = (<span class="built_in">NSDictionary</span> *)data;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">pragma</span> mark - ECOBasePlugin methods</span></span><br><span class="line">- (<span class="keyword">void</span>)didReceivedPacketData:(<span class="keyword">id</span>)data &#123;</span><br><span class="line">    <span class="comment">// 在这里实现你自己的业务功能</span></span><br><span class="line">    <span class="built_in">NSDictionary</span> *dict = (<span class="built_in">NSDictionary</span> *)data;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>以上就是扩展新插件的步骤，新的插件只需要关注自己的数据逻辑即可，扩展接入时都比较方便。</p>
 <h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p><strong>Echo</strong>是一款为了提高客户端研发调试效率的工具，同时支持快速扩展新的业务插件，如果你也有这方面的需求，欢迎试用。Echo在开发过程中也借鉴了开源社区的一些优秀项目，感谢它们提供的技术帮助。更多内容参见Github：</p>
 <p>Github: <a href="https://github.com/didi/echo" target="_blank" rel="noopener">https://github.com/didi/echo</a></p>
@@ -345,6 +355,8 @@
 </script>
 <!-- Baidu Tongji -->
 
+
 <script src="/js/script.js"></script>
+
   </body>
 </html>

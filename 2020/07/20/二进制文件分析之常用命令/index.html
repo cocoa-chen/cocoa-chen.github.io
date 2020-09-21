@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="cocoa_chen&#39;s blog">
+  <meta name="keyword" content="objective-C, cocoa_chen, Swift">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      二进制文件分析之常用命令 | cocoa_chen
+    
+  </title>
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+  
+<script src="/js/qrious.js"></script>
+<script src="/js/gitment.js"></script>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>cocoa_chen</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>二进制文件分析之常用命令</h2>
+  <p class="post-date">2020-07-20</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="一、背景介绍"><a href="#一、背景介绍" class="headerlink" title="一、背景介绍"></a>一、背景介绍</h2><p>最近新版本审核时被拒了，Apple给出的原因是使用到了Intents的功能，但是Info.plist中并未给出使用简介导致被拒。由于我们的App并不需要使用Intents等能力，所以需要排查是哪些第三方库引入的Intents.framework。下面将介绍在分析二进制文件时常用的一些命令，帮助我们快速定位问题。</p>
+<p>首先下载jenkins打好包的IPA文件，修改ipa后缀为zip并解压，在命令行中cd 进入/Payload/TestProject.app（这里重命名为TestProject）目录下，后续步骤见命令介绍</p>
+<h2 id="二、常用命令"><a href="#二、常用命令" class="headerlink" title="二、常用命令"></a>二、常用命令</h2><h3 id="1-otool"><a href="#1-otool" class="headerlink" title="1. otool"></a>1. otool</h3><p>otool命令全称object file displaying tool，是针对目标文件的展示工具，可以帮助我们发现应用中使用了哪些系统库，以及调用了哪些对象的方法和属性。</p>
+<p>常用的几个子命令如下：</p>
+<ul>
+<li><code>otool -L path</code>  //查看可执行程序都链接了那些库</li>
+<li><code>otool -L path | grep &quot;xxx&quot;</code> //筛选是否链接了xxx库</li>
+<li><code>otool -ov path</code>  //输出Object-C类结构以及定义的方法</li>
+</ul>
+<p>首先我们通过otool -L XXX命令可以确定安装包中是否包含了Intents相关的framework，通过结果可以确定的确是链接了相关库导致命中了Apple的审核扫描</p>
+<p><img src="/images/otoolFile/15947941642389.png" alt=""></p>
+<h3 id="2-lipo"><a href="#2-lipo" class="headerlink" title="2. lipo"></a>2. lipo</h3><p>lipo命令的作用是create or operate on universal files，即创建或处理通用文件的工具。</p>
+<p>常用的几个子命令如下：</p>
+<ul>
+<li><code>lipo -info XXX</code> // 判断静态库所支持的平台 armv7  x86_64 arm64</li>
+<li><code>lipo -remove armv7 origin_xxx.a -output op_xxx.a</code> // 删除静态库包括的armv7平台</li>
+<li><code>lipo -thin arm64 origin_xxx.a -output op_xxx.a</code> // 拆分静态库，只保留arm64 CPU架构</li>
+<li><code>lipo -create device_xxx.a simulator_xxx.a -output universal_xxx.a</code> //对真机或者模拟器分别打出 .a 文件合并</li>
+</ul>
+<p>接下来我们就需要用到lipo命令了，由于我们打包的MachO文件都是fat file，包含了armv7和arm64，所以搜索信息时会出现重复两份的情况。为了方便排查，我们将从MachO文件单独拆分出arm64架构。</p>
+<p><img src="/images/otoolFile/15947942731331.png" alt=""></p>
+<h3 id="3-nm"><a href="#3-nm" class="headerlink" title="3. nm"></a>3. nm</h3><p>nm命令的作用是显示符号表，常用的几个子命令如下：</p>
+<ul>
+<li><code>nm path</code> //得到Mach-O中的程序符号表</li>
+<li><code>nm -nm path</code> //目标文件的所有符号</li>
+<li><code>nm -u path</code> //Display only undefined symbols.</li>
+</ul>
+<p>这里我们直接用nm命令找到Intents相关framework的引用符号表，由于是外部framework，所以符号都是undefined。</p>
+<p><img src="/images/otoolFile/15947943447772.png" alt=""></p>
+<p>通过nm命令可以看到macho文件中因为引用了INPreferences和INUIEditVoiceShortcutViewController等符号导致间接引入了Intents.framework和IntentsUI.framework，下面我们通过otool命令导出macho文件中的OC信息来辅助排查是哪些类引入了这几个符号。</p>
+<p>在命令行在使用otool -ov XXX导出OC相关的类结构和相关方法到本地。</p>
+<p><img src="/images/otoolFile/15947944966351.png" alt=""></p>
+<p>接下来用Sublime等软件打开刚才导出的ov.txt文件，搜索INUIEditVoiceShortcutViewController，可以看到是某个第三方库的类引入了相关代码导致引入了该符号，注释掉相关代码可解决。</p>
+<p>搜索INPreferences时，发现是以<em>OBJC_CLASS</em>$_INPreferences的关键字引入的，在Xcode中搜索INPreferences，发现某个第三方库的类中调用了INPreferences的requestSiriAuthorization方法导致引入了该符号。代码示例如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if (@available(iOS 10.0, *)) &#123;</span><br><span class="line">  [INPreferences requestSiriAuthorization:^(INSiriAuthorizationStatus status) &#123;</span><br><span class="line">  &#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过以上的命令和步骤便可定位解决Intents.framework和IntentsUI.framework引入的问题，避免审核再次被拒。</p>
+<h3 id="4-strings"><a href="#4-strings" class="headerlink" title="4. strings"></a>4. strings</h3><p>最后介绍一下strings命令，它可以帮助我们排查二进制文件中是否包含相关字符串，常用的命令为：</p>
+<p><code>strings XXX | grep yourString</code></p>
+<p>在打包生成的MachO文件中，我们的类名、方法名都会以字符串明文的形式存储到MachO文件中，我们可以通过grep requestSiriAuthorization:来确定是否走了<code>[INPreferences requestSiriAuthorization:^(INSiriAuthorizationStatus status) { }];</code>方法。</p>
+<p><img src="/images/otoolFile/15947948125234.png" alt=""></p>
+<p>修改完上述检测到的代码，重新打包验证，最终结果没有Intents相关的framework，问题解决。</p>
+<h2 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h2><p>我是直接用IPA包进行的分析，你也可以利用上述命令封装成脚本，对工程中的所有.a遍历检查，定位是哪个第三方库引用的不合法符号，也是一种解决思路。</p>
+<p>以上就是我们在分析二进制文件时常用的命令，这里做个总结，方便我们有相关需求时可以通过otool/nm/strings等命令快速自查，解决问题。</p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#编译 iOS" >
+    <span class="tag-code">编译 iOS</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- 打赏 START -->
+    
+      <div class="money-like">
+        <div class="reward-btn">
+          赏
+          <span class="money-code">
+            <span class="alipay-code">
+              <div class="code-image"></div>
+              <b>使用支付宝打赏</b>
+            </span>
+            <span class="wechat-code">
+              <div class="code-image"></div>
+              <b>使用微信打赏</b>
+            </span>
+          </span>
+        </div>
+        <p class="notice">若你觉得我的文章对你有帮助，欢迎点击上方按钮对我打赏</p>
+      </div>
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    <div class="qrcode">
+      <canvas id="share-qrcode"></canvas>
+      <p class="notice">扫描二维码，分享此文章</p>
+    </div>
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://yoursite.com/2020/07/20/二进制文件分析之常用命令/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+     // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+        
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+
+    // gitment
+    var gitmentConfig = "cocoa-chen";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "二进制文件分析之常用命令",
+        owner: "cocoa-chen",
+        repo: "cocoa-chen.github.io",
+        oauth: {
+          client_id: "e12c4d16bb2a811822a7",
+          client_secret: "8fa9d6ce27d985bc1ed6027ee666305208a5e86e"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  })();
+</script>
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2020 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

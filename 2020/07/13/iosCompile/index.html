@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="cocoa_chen&#39;s blog">
+  <meta name="keyword" content="objective-C, cocoa_chen, Swift">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      iOS 编译知识小结 | cocoa_chen
+    
+  </title>
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+  
+<script src="/js/qrious.js"></script>
+<script src="/js/gitment.js"></script>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>cocoa_chen</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>iOS 编译知识小结</h2>
+  <p class="post-date">2020-07-13</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>拖更很久了，今天水文一篇。简单介绍下iOS底层编译的相关知识，帮助我们充分理解了iOS编译的过程，相信会对我们后续的开发有一定帮助。</p>
+<h2 id="源码到可执行文件流程"><a href="#源码到可执行文件流程" class="headerlink" title="源码到可执行文件流程"></a>源码到可执行文件流程</h2><p>首先看一下iOS代码是如何从源码变成可执行文件的，有助于我们了解程序从编译到运行的全流程</p>
+<ol>
+<li>编译器Clang会将源码XXX.m编译为目标文件XXX.o</li>
+<li>链接器会将目标文件链接打包进最终的可执行文件Mach-O中</li>
+<li>点击App ICON时，动态链接器dyld会加载可执行文件以及依赖的动态库，并最终执行到main.m里，至此App启动完成</li>
+</ol>
+<p><img src="/images/compile/15943851371397.jpg" alt=""></p>
+<h2 id="编译器"><a href="#编译器" class="headerlink" title="编译器"></a>编译器</h2><p>编译器是将编程语言转换为目标语言的程序，大多数编译器由两部分组成：前端和后端。</p>
+<ul>
+<li>前端负责词法分析，语法分析，生成中间代码；</li>
+<li>后端以中间代码作为输入，进行行架构无关的代码优化，接着针对不同架构生成不同的机器码。</li>
+</ul>
+<p>前后端依赖统一格式的中间代码(IR)，使得前后端可以独立的变化。新增一门语言只需要修改前端，而新增一个CPU架构只需要修改后端即可。</p>
+<p>Objective C/C/C++使用的编译器前端是clang，swift是swift，后端都是LLVM。</p>
+<p><img src="/images/compile/15943851626767.jpg" alt=""></p>
+<p>LLVM是一个模块化和可重用的编译器和工具链技术的集合，Clang 是 LLVM 的子项目，是 C，C++ 和 Objective-C 编译器，目的是提供惊人的快速编译，比 GCC 快3倍，</p>
+<p>LLVM 还可以提供一种代码编写良好的中间表示 IR，这意味着它可以作为多种语言的后端，这样就能够提供语言无关的优化同时还能够方便的针对多种 CPU 的代码生成。</p>
+<h2 id="编译流程"><a href="#编译流程" class="headerlink" title="编译流程"></a>编译流程</h2><p>Objective-C的编译器前端是Clang，诞生之初是为了替代GCC，提供更快的编译速度。我们可以通过下面这张图来了解Clang编译的大致流程：</p>
+<p><img src="/images/compile/15943851986145.jpg" alt=""></p>
+<p>下面我们通过clang命令来具体分析下源码编译的流程：</p>
+<p>首先在命令行里输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -ccc-print-phases main.m</span><br></pre></td></tr></table></figure>
+
+<p>可以看到源文件编译需要的几个不同的阶段</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">➜  clang -ccc-print-phases main.m</span><br><span class="line">0: input, &quot;main.m&quot;, objective-c</span><br><span class="line">1: preprocessor, &#123;0&#125;, objective-c-cpp-output  &#x2F;&#x2F;预编译</span><br><span class="line">2: compiler, &#123;1&#125;, ir  &#x2F;&#x2F;编译成中间代码ir</span><br><span class="line">3: backend, &#123;2&#125;, assembler  &#x2F;&#x2F;生成汇编</span><br><span class="line">4: assembler, &#123;3&#125;, object  &#x2F;&#x2F;生成目标文件.O</span><br><span class="line">5: linker, &#123;4&#125;, image  &#x2F;&#x2F;链接成可执行文件</span><br><span class="line">6: bind-arch, &quot;x86_64&quot;, &#123;5&#125;, image</span><br></pre></td></tr></table></figure>
+
+<p>接下来我们新建一个main.m并详细来看下每个步骤分别做了什么</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">main.m</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line">  printf(&quot;hello world\n&quot;);</span><br><span class="line">  return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="预处理-preprocessor"><a href="#预处理-preprocessor" class="headerlink" title="预处理(preprocessor)"></a>预处理(preprocessor)</h3><p>我们用下面的命令来查看clang预处理的结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -E main.m</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：如果main.m中用到了UIKit等类，可以在命令后添加-sysroot参数，记得将sdk换成你本机的版本，后续命令解决方法相同。如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -E main.m -isysroot &#x2F;Applications&#x2F;Xcode.app&#x2F;Contents&#x2F;Developer&#x2F;Platforms&#x2F;iPhoneSimulator.platform&#x2F;Developer&#x2F;SDKs&#x2F;iPhoneSimulator13.0.sdk</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>可以看到预处理后的文件行数有很多，在最后可以找到main函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># 13 &quot;&#x2F;Applications&#x2F;Xcode.app&#x2F;Contents&#x2F;Developer&#x2F;Platforms&#x2F;iPhoneSimulator.platform&#x2F;Developer&#x2F;SDKs&#x2F;iPhoneSimulator13.0.sdk&#x2F;System&#x2F;Library&#x2F;Frameworks&#x2F;UIKit.framework&#x2F;Headers&#x2F;ShareSheet.h&quot; 2 3</span><br><span class="line"># 17 &quot;&#x2F;Applications&#x2F;Xcode.app&#x2F;Contents&#x2F;Developer&#x2F;Platforms&#x2F;iPhoneSimulator.platform&#x2F;Developer&#x2F;SDKs&#x2F;iPhoneSimulator13.0.sdk&#x2F;System&#x2F;Library&#x2F;Frameworks&#x2F;UIKit.framework&#x2F;Headers&#x2F;UIKit.h&quot; 2 3</span><br><span class="line"># 10 &quot;main.m&quot; 2</span><br><span class="line"># 1 &quot;.&#x2F;AppDelegate.h&quot; 1</span><br><span class="line"># 11 &quot;.&#x2F;AppDelegate.h&quot;</span><br><span class="line">@interface AppDelegate : UIResponder &lt;UIApplicationDelegate&gt;</span><br><span class="line"> </span><br><span class="line">@property (strong, nonatomic) UIWindow *window;</span><br><span class="line"> </span><br><span class="line">@end</span><br><span class="line"># 11 &quot;main.m&quot; 2</span><br><span class="line"> </span><br><span class="line">int main(int argc, char * argv[]) &#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        return UIApplicationMain(argc, argv, ((void *)0), NSStringFromClass([AppDelegate class]));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>预处理会替进行头文件引入(递归操作)，宏替换#define，注释处理，条件编译(#ifdef)，#pargma处理等操作。比如#include “stdio.h”就是告诉预处理器将这一行替换成头文件stdio.h中的内容，这个过程是递归的：因为stdio.h也有可能包含其头文件。</p>
+<h3 id="词法分析-lexical-anaysis"><a href="#词法分析-lexical-anaysis" class="headerlink" title="词法分析(lexical anaysis)"></a>词法分析(lexical anaysis)</h3><p>预处理完成后就会进行词法分析，这里会把代码切成一个个 Token，比如大小括号，等于号还有字符串等。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -fmodules -fsyntax-only -Xclang -dump-tokens main.m</span><br></pre></td></tr></table></figure>
+
+<h3 id="语法分析-semantic-analysis"><a href="#语法分析-semantic-analysis" class="headerlink" title="语法分析(semantic analysis)"></a>语法分析(semantic analysis)</h3><p>语法分析会校验语法的正确性，然后将所有的节点组成抽象语法树AST。有了抽象语法树，clang就可以对这个树进行分析，找出代码中的错误。比如类型不匹配，亦或Objective C中向target发送了一个未实现的消息。</p>
+<blockquote>
+<p>业内对Clang自定义插件或者开发静态检测插件都是基于AST语法树来分析。相关知识后续会学到。AST是开发者编写clang插件主要交互的数据结构，clang也提供很多API去读取AST。更多细节：<a href="https://clang.llvm.org/docs/IntroductionToTheClangAST.html" target="_blank" rel="noopener">Introduction to the Clang AST</a>。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -fmodules -fsyntax-only -Xclang -ast-dump main.m</span><br></pre></td></tr></table></figure>
+
+<p>在输出里可以看到相关的AST结果，如下图：</p>
+<p><img src="/images/compile/15943854650014.jpg" alt=""></p>
+<h3 id="CodeGen"><a href="#CodeGen" class="headerlink" title="CodeGen"></a>CodeGen</h3><p>CodeGen 会负责将语法树自顶向下遍历逐步翻译成 LLVM IR，IR 是编译过程的前端的输出，也是后端的输入。<br>Objective C代码也在这一步会进行runtime的桥接：property合成，ARC处理等。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -S -fobjc-arc -emit-llvm main.m -o main.ll</span><br></pre></td></tr></table></figure>
+
+<p>查看main.ll的内容如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">; Function Attrs: noinline optnone ssp uwtable</span><br><span class="line">define i32 @main(i32, i8**) #0 &#123;</span><br><span class="line">  %3 &#x3D; alloca i32, align 4</span><br><span class="line">  %4 &#x3D; alloca i32, align 4</span><br><span class="line">  %5 &#x3D; alloca i8**, align 8</span><br><span class="line">  store i32 0, i32* %3, align 4</span><br><span class="line">  store i32 %0, i32* %4, align 4</span><br><span class="line">  store i8** %1, i8*** %5, align 8</span><br><span class="line">  %6 &#x3D; call i8* @llvm.objc.autoreleasePoolPush() #1</span><br><span class="line">  %7 &#x3D; load i32, i32* %4, align 4</span><br><span class="line">  %8 &#x3D; load i8**, i8*** %5, align 8</span><br><span class="line">  %9 &#x3D; load %struct._class_t*, %struct._class_t** @&quot;OBJC_CLASSLIST_REFERENCES_$_&quot;, align 8</span><br><span class="line">  %10 &#x3D; bitcast %struct._class_t* %9 to i8*</span><br><span class="line">  %11 &#x3D; call i8* @objc_opt_class(i8* %10)</span><br><span class="line">  %12 &#x3D; call %0* @NSStringFromClass(i8* %11)</span><br><span class="line">  %13 &#x3D; bitcast %0* %12 to i8*</span><br><span class="line">  %14 &#x3D; notail call i8* @llvm.objc.retainAutoreleasedReturnValue(i8* %13) #1</span><br><span class="line">  %15 &#x3D; bitcast i8* %14 to %0*</span><br><span class="line">  %16 &#x3D; call i32 @UIApplicationMain(i32 %7, i8** %8, %0* null, %0* %15)</span><br><span class="line">  store i32 %16, i32* %3, align 4</span><br><span class="line">  %17 &#x3D; bitcast %0* %15 to i8*</span><br><span class="line">  call void @llvm.objc.release(i8* %17) #1, !clang.imprecise_release !10</span><br><span class="line">  call void @llvm.objc.autoreleasePoolPop(i8* %6)</span><br><span class="line">  %18 &#x3D; load i32, i32* %3, align 4</span><br><span class="line">  ret i32 %18</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">; Function Attrs: nounwind</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>如果在项目配置中开启了 bitcode， 苹果还会做进一步的优化，有新的后端架构还是可以用这份优化过的 bitcode 去生成。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -emit-llvm -c main.m -o main.bc</span><br></pre></td></tr></table></figure>
+
+<h3 id="生成汇编代码"><a href="#生成汇编代码" class="headerlink" title="生成汇编代码"></a>生成汇编代码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -S -fobjc-arc main.m -o main.s</span><br></pre></td></tr></table></figure>
+
+<h3 id="生成目标文件"><a href="#生成目标文件" class="headerlink" title="生成目标文件"></a>生成目标文件</h3><p>汇编器以汇编代码作为输入，将汇编代码转换为机器代码，最后输出目标文件(object file)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -fmodules -c main.m -o main.o</span><br></pre></td></tr></table></figure>
+
+<p>接下来我们用nm命令，查看下main.o中的符号</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  BuildTest nm -nm main.o</span><br><span class="line">                 (undefined) external _printf</span><br><span class="line">0000000000000000 (__TEXT,__text) external _main</span><br></pre></td></tr></table></figure>
+
+<p>这里可以看到_printf是一个是undefined external的。undefined表示在当前文件暂时找不到符号_printf，而external表示这个符号是外部可以访问的，对应表示文件私有的符号是non-external。</p>
+<h3 id="生成可执行文件"><a href="#生成可执行文件" class="headerlink" title="生成可执行文件"></a>生成可执行文件</h3><p>链接器可以把编译产生的.o文件和（dylib,a,tbd）文件，生成一个mach-o文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang main.o -o main</span><br></pre></td></tr></table></figure>
+
+<p>接着在命令行执行./main，可以看到输出了结果：hello world。<br>最后我们用nm命令来分析下可执行文件的符号表：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">➜  BuildTest nm -nm main</span><br><span class="line">                 (undefined) external _printf (from libSystem)</span><br><span class="line">                 (undefined) external dyld_stub_binder (from libSystem)</span><br><span class="line">0000000100000000 (__TEXT,__text) [referenced dynamically] external __mh_execute_header</span><br><span class="line">0000000100000f60 (__TEXT,__text) external _main</span><br><span class="line">0000000100002008 (__DATA,__data) non-external __dyld_private</span><br></pre></td></tr></table></figure>
+
+<p>可以看到_printf仍然是undefined，但是后面多了一些信息：from libSystem，表示这个符号来自于libSystem，会在运行时动态绑定。</p>
+<p>以上就是Clang编译源文件的完整流程了。</p>
+<h2 id="Xcode中查看Clang编译-m文件信息"><a href="#Xcode中查看Clang编译-m文件信息" class="headerlink" title="Xcode中查看Clang编译.m文件信息"></a>Xcode中查看Clang编译.m文件信息</h2><p>如果你想在 Xcode 中查看，可以通过 Show the report navigator 里对应 target 的 build 中查看每个 .m 文件的 clang 编译信息，如下图：</p>
+<p><img src="/images/compile/15943859706825.png" alt=""></p>
+<p>随便找一个.m文件编译信息，可以看到Xcode会首先对任务进行描述：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CompileC &#x2F;Users&#x2F;chenaibin&#x2F;Library&#x2F;Developer&#x2F;Xcode&#x2F;DerivedData&#x2F;PodIntegrationDemo-achbuytjuwbatqbzvlwflifarxwa&#x2F;Build&#x2F;Intermediates.noindex&#x2F;Pods.build&#x2F;Debug-iphonesimulator&#x2F;podLibB.build&#x2F;Objects-normal&#x2F;x86_64&#x2F;podClsB.o &#x2F;Users&#x2F;chenaibin&#x2F;Work&#x2F;DiDi&#x2F;iOSDemo&#x2F;BuildErrorDemo&#x2F;podLibB&#x2F;Classes&#x2F;podClsB.m normal x86_64 objective-c com.apple.compilers.llvm.clang.1_0.compiler (in target &#39;podLibB&#39; from project &#39;Pods&#39;)</span><br></pre></td></tr></table></figure>
+
+<p>接下来对会更新工作路径，同时设置 PATH</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd &#x2F;Users&#x2F;chenaibin&#x2F;Work&#x2F;DiDi&#x2F;iOSDemo&#x2F;BuildErrorDemo&#x2F;PodIntegrationDemo&#x2F;Pods</span><br><span class="line">export LANG&#x3D;en_US.US-ASCII</span><br><span class="line">export PATH&#x3D;&quot;&#x2F;Applications&#x2F;Xcode.app&#x2F;Contents&#x2F;Developer&#x2F;Platforms&#x2F;iPhoneSimulator.platform&#x2F;Developer&#x2F;usr&#x2F;bin:&#x2F;Applications&#x2F;Xcode.app&#x2F;Contents&#x2F;Developer&#x2F;usr&#x2F;bin:&#x2F;usr&#x2F;local&#x2F;bin:&#x2F;usr&#x2F;bin:&#x2F;bin:&#x2F;usr&#x2F;sbin:&#x2F;sbin&quot;</span><br></pre></td></tr></table></figure>
+
+<p>接下来就是实际的编译命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;Applications&#x2F;Xcode.app&#x2F;Contents&#x2F;Developer&#x2F;Toolchains&#x2F;XcodeDefault.xctoolchain&#x2F;usr&#x2F;bin&#x2F;clang -x objective-c -target x86_64-apple-ios9.0-simulator -fmessage-length&#x3D;0 -fobjc-arc… -Wno-missing-field-initializers ... -DDEBUG&#x3D;1 ... -isysroot &#x2F;Applications&#x2F;Xcode.app&#x2F;Contents&#x2F;Developer&#x2F;Platforms&#x2F;iPhoneSimulator.platform&#x2F;Developer&#x2F;SDKs&#x2F;iPhoneSimulator13.0.sdk -iquote ... -I... -F...-c &#x2F;...&#x2F;podClsB.m -o &#x2F;...&#x2F;podClsB.o</span><br></pre></td></tr></table></figure>
+
+<p>clang 用到的命令参数如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-x 编译语言比如objective-c</span><br><span class="line">-arch 编译的架构，比如arm64</span><br><span class="line">-f 以-f开头的。</span><br><span class="line">-W 以-W开头的，可以通过这些定制编译警告</span><br><span class="line">-D 以-D开头的，指的是预编译宏，通过这些宏可以实现条件编译</span><br><span class="line">-iPhoneSimulator13.0.sdk 编译采用的iOS SDK版本</span><br><span class="line">-I 把编译信息写入指定的辅助文件</span><br><span class="line">-F 需要的Framework</span><br><span class="line">-c 标识符指明需要运行预处理器，语法分析，类型检查，LLVM生成优化以及汇编代码生成.o文件</span><br><span class="line">-o 编译结果</span><br></pre></td></tr></table></figure>
+
+<h2 id="Xcode常见编译报错分析"><a href="#Xcode常见编译报错分析" class="headerlink" title="Xcode常见编译报错分析"></a>Xcode常见编译报错分析</h2><h3 id="1-duplicate-symbols报错"><a href="#1-duplicate-symbols报错" class="headerlink" title="1. duplicate symbols报错"></a>1. duplicate symbols报错</h3><p>第一个常见的编译报错原因就是duplicate symbols，如下图就是因为我们链接后的可执行文件存在了重复的类导致的。</p>
+<p><img src="/images/compile/15943862679061.jpg" alt=""></p>
+<p>注：由于我们工程是由CocoaPods构建的，在xcconfig中OTHER_LINK_FLAG都会被默认设置成$(inherited) -ObjC ……，这会导致工程配置里Other Linker Flags会带上 -ObjC标记，如果我们手动删除了-ObjC，就会发现在编译时不会有duplicate symbols的错误了。但是运行的时候可能会出现unrecognized selector sent to class XXX的错误，这是由于静态库中的分类并没被链接器链接进可执行文件中。</p>
+<p>-ObjC会把静态库中所有的类和分类都链接进可执行文件，所以会出现duplicate symbols的错误。下面是官方描述：</p>
+<blockquote>
+<p>This flag causes the linker to load every object file in the library that defines an Objective-C class or category. While this option will typically result in a larger executable (due to additional object code loaded into the application), it will allow the successful creation of effective Objective-C static libraries that contain categories on existing classes.</p>
+</blockquote>
+<h3 id="2-symbol-s-not-found-for-architecture-x86-64-arm64"><a href="#2-symbol-s-not-found-for-architecture-x86-64-arm64" class="headerlink" title="2. symbol(s) not found for architecture x86_64/arm64"></a>2. symbol(s) not found for architecture x86_64/arm64</h3><p>第二个常见报错是在某个架构下找不到相关符号，这是因为引用的某个静态库并没有包含当前工程制式下的架构类型，解决方案是将静态库.a文件合并x86_64/arm64等架构为fat file，再集成到工程里使用。</p>
+<p>报错原因如下图：</p>
+<p><img src="/images/compile/15943863074665.jpg" alt=""></p>
+<blockquote>
+<p>提示：遇到这种情况时，有时候多次pod update也不能解决报错原因。这是因为你本地缓存了有问题的静态库文件，可在以下目录下找到相关类库并删除，再执行pod install下载fix后的静态库文件。</p>
+<p>CocoaPods官方缓存目录：~/Library/Caches/CocoaPods/Pods</p>
+</blockquote>
+<p>这个错误还有另外一种情况，当同一个pod在多个不同的端集成时可能会遇到。报错信息大致如下：</p>
+<p><img src="/images/compile/15943863817912.jpg" alt=""></p>
+<p>问题原因：在ProjectA中集成了podA和podB，podA使用了#if __has_include(“podB中的cls.h”)集成了podB中的类；当切换到ProjectB时，只会依赖podA一个库，这个时候编译就会上图中的错误。</p>
+<p>解决方案：在ProjectB中将podA以源码重新编译一遍即可。</p>
+<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><h3 id="Clang-Attributes"><a href="#Clang-Attributes" class="headerlink" title="Clang Attributes"></a>Clang Attributes</h3><p>在平时开发中，我们经常会遇到头文件里有<strong>attribute</strong>的用法，它是一个高级的的编译器指令，它允许开发者指定更更多的编译检查和一些高级的编译期优化。</p>
+<p><code>__attribute__</code> 语法格式为：<strong>attribute</strong> ((attribute-list)) 放在声明分号“;”前面。</p>
+<p>比如，在三方库中最常见的，声明一个属性或者方法在当前版本弃用了</p>
+<p>@property (strong,nonatomic)CLASSNAME * property __deprecated;</p>
+<p>下面是 iOS开发中常见的几个 <code>__attribute__</code> 用法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;弃用API，用作API更新</span><br><span class="line">#define __deprecated    __attribute__((deprecated))</span><br><span class="line"> </span><br><span class="line">&#x2F;&#x2F;带描述信息的弃用</span><br><span class="line">#define __deprecated_msg(_msg) __attribute__((deprecated(_msg)))</span><br><span class="line"> </span><br><span class="line">&#x2F;&#x2F;遇到__unavailable的变量&#x2F;方法，编译器直接抛出Error</span><br><span class="line">#define __unavailable   __attribute__((unavailable))</span><br><span class="line"> </span><br><span class="line">&#x2F;&#x2F;告诉编译器，即使这个变量&#x2F;方法 没被使用，也不要抛出警告</span><br><span class="line">#define __unused    __attribute__((unused))</span><br><span class="line"> </span><br><span class="line">&#x2F;&#x2F;和__unused相反</span><br><span class="line">#define __used      __attribute__((used))</span><br><span class="line"> </span><br><span class="line">&#x2F;&#x2F;如果不使用方法的返回值，进行警告</span><br><span class="line">#define __result_use_check __attribute__((__warn_unused_result__))</span><br><span class="line"> </span><br><span class="line">&#x2F;&#x2F;OC方法在Swift中不可用</span><br><span class="line">#define __swift_unavailable(_msg)   __attribute__((__availability__(swift, unavailable, message&#x3D;_msg)))</span><br></pre></td></tr></table></figure>
+
+<h3 id="Clang警告处理"><a href="#Clang警告处理" class="headerlink" title="Clang警告处理"></a>Clang警告处理</h3><p>当我们在XCode中屏蔽部分Warning信息时，可以使用下面的内容来解决。通过clang diagnostic push/pop来控制代码块的编译选项。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#pragma clang diagnostic push</span><br><span class="line">#pragma clang diagnostic ignored &quot;-Wundeclared-selector&quot;</span><br><span class="line">&#x2F;&#x2F;&#x2F;代码</span><br><span class="line">#pragma clang diagnostic pop</span><br></pre></td></tr></table></figure>
+
+<h3 id="预处理"><a href="#预处理" class="headerlink" title="预处理"></a>预处理</h3><p>预处理可以让我们让我们自定义编译器变量，实现条件编译。 比如我们常用的DEBUG宏：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#ifdef DEBUG</span><br><span class="line">&#x2F;&#x2F;...</span><br><span class="line">#else</span><br><span class="line">&#x2F;&#x2F;...</span><br><span class="line">#endif</span><br></pre></td></tr></table></figure>
+
+<p>我们可以在XCode的Target中选中Build Setting选项，搜索proprecess，即可看到定义好的预处理宏。</p>
+<p><img src="/images/compile/15943865923970.png" alt=""></p>
+<p>目前iOS基本都是用CocoaPods来管理工程，我们也可以在每个Pod的podspec文件中配置预编译宏，CocoaPods会在构建工程时将这些信息写到Pod的xcconfig文件里。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># Pod.podspec示例</span><br><span class="line">s.subspec &#39;YourSubSpec&#39; do | ss |</span><br><span class="line">  ss.source_files &#x3D; &#39;Pod&#x2F;Classes&#x2F;**&#x2F;*&#39;</span><br><span class="line">  ss.pod_target_xcconfig &#x3D; &#123; &#39;GCC_PREPROCESSOR_DEFINITIONS&#39; &#x3D;&gt; &#39;$(inherited) YOUR_CUSTOM_DEFINE&#x3D;1&#39; &#125;</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：podA定义的GCC_PREPROCESSOR_DEFINITIONS内容在podB中是不生效的！！！<br>如果想解决这个问题，推荐podB中单独定义一个subspec来配置预编译宏的值，在外层工程里通过区分是否引入podB的subspec来实现该预编译宏值的控制。</p>
+</blockquote>
+<h3 id="Clang插件开发"><a href="#Clang插件开发" class="headerlink" title="Clang插件开发"></a>Clang插件开发</h3><p>上面介绍到语法分析之后我们可以拿到抽象语法树AST，接着就可以对这个树进行分析，做静态代码分析或者无用代码分析都可以，网上也有很多资料介绍这块的研究。感兴趣的可以搜索下或者看下 <a href="https://clang.llvm.org/docs/IntroductionToTheClangAST.html" target="_blank" rel="noopener">Introduction to the Clang AST</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上内容主要介绍了下iOS编译相关的知识，如有内容错误，欢迎指正。</p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#编译 iOS" >
+    <span class="tag-code">编译 iOS</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- 打赏 START -->
+    
+      <div class="money-like">
+        <div class="reward-btn">
+          赏
+          <span class="money-code">
+            <span class="alipay-code">
+              <div class="code-image"></div>
+              <b>使用支付宝打赏</b>
+            </span>
+            <span class="wechat-code">
+              <div class="code-image"></div>
+              <b>使用微信打赏</b>
+            </span>
+          </span>
+        </div>
+        <p class="notice">若你觉得我的文章对你有帮助，欢迎点击上方按钮对我打赏</p>
+      </div>
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    <div class="qrcode">
+      <canvas id="share-qrcode"></canvas>
+      <p class="notice">扫描二维码，分享此文章</p>
+    </div>
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://yoursite.com/2020/07/13/iosCompile/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+     // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+        
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+
+    // gitment
+    var gitmentConfig = "cocoa-chen";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "iOS 编译知识小结",
+        owner: "cocoa-chen",
+        repo: "cocoa-chen.github.io",
+        oauth: {
+          client_id: "e12c4d16bb2a811822a7",
+          client_secret: "8fa9d6ce27d985bc1ed6027ee666305208a5e86e"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  })();
+</script>
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2020 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

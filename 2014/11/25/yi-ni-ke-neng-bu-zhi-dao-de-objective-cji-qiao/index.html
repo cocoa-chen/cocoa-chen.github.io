@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="cocoa_chen&#39;s blog">
+  <meta name="keyword" content="objective-C, cocoa_chen, Swift">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      (译)你可能不知道的Objective-C技巧 | cocoa_chen
+    
+  </title>
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdn.bootcss.com/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdn.bootcss.com/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdn.bootcss.com/nprogress/0.2.0/nprogress.min.js"></script>
+  
+<script src="/js/qrious.js"></script>
+<script src="/js/gitment.js"></script>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>cocoa_chen</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>(译)你可能不知道的Objective-C技巧</h2>
+  <p class="post-date">2014-11-25</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><a id="more"></a>
+
+<p>如果你在阅读这些文章，你大概已经对iOS开发的基础知识有了很好的掌握，但还是有一些小的技巧和实践是很多开发者不熟悉的，即使是已经有几年开发经验的人。在这一章中，你会学到一些很重要的提示和技巧，但这还远远不够，你需要多多练习以使得你的代码更加健壮以及可维护性更好。</p>
+<blockquote>
+<p>注：本文翻译自《iOS7 Pushing the limits》一书的第三章“You May Not Know”，翻译不当之处敬请谅解。</p>
+</blockquote>
+<h3 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h3><ul>
+<li>一、最好的命名实践</li>
+<li>二、属性(Property)和实例变量(Ivar)的最佳实践</li>
+<li>三、分类(Categories)</li>
+<li>四、关联引用(Associative References)</li>
+<li>五、Weak Collections</li>
+<li>六、NSCache</li>
+<li>七、NSURLComponents</li>
+<li>八、CFStringTransform</li>
+<li>九、instancetype</li>
+<li>十、Base64 and Percent Encoding</li>
+<li>十一、-[NSArray firstObject]</li>
+<li>十二、Summary</li>
+<li>十三、更多阅读</li>
+</ul>
+<h3 id="一、最好的命名实践"><a href="#一、最好的命名实践" class="headerlink" title="一、最好的命名实践"></a>一、最好的命名实践</h3><p>在iOS开发中，命名规范极其重要。在接下来的内容中，我们将学习如何正确命名各种条目，以及为什么这么命名。</p>
+<h3 id="1-自动变量"><a href="#1-自动变量" class="headerlink" title="1.自动变量"></a>1.自动变量</h3><p>Cocoa是动态类型的语言，你很容易对所使用的类型感到困惑。集合（数组，字典等等）没有关联它们的类型，所以很容易发生这样的意外：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NSArray *dates &#x3D; @[@&quot;1&#x2F;1&#x2F;2000&quot;];</span><br><span class="line">NSDate *firstDate &#x3D; [dates firstObject];</span><br></pre></td></tr></table></figure>
+
+<p>这样的代码没有编译警告，但是当你尝试使用<code>firstDate</code>时，很可能会报错（an unknown selector exception），错误原因是调用了一个字符串类型的数组<code>dates</code>。这个数组应该命名为<code>dateStrings</code>或者它包含的是<code>NSDate</code>类型的对象。这样小心的命名将会为你避免很多头疼的错误。</p>
+<h3 id="2-方法"><a href="#2-方法" class="headerlink" title="2.方法"></a>2.方法</h3><p><strong>1)</strong>方法名应该清晰的表明接收和返回的类型。例如：这个方法名就是令人困惑的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)add;  &#x2F;&#x2F; 令人困惑</span><br></pre></td></tr></table></figure>
+
+<p>看起来<code>add</code>方法应该带个参数，但它没有。难道它是添加一些默认对象？<br>这样命名就清楚多了：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- (void)addEmptyRecord;</span><br><span class="line">- (void)addRecord:(Record *)record;</span><br></pre></td></tr></table></figure>
+
+<p>现在<code>addRecord:</code>接收了一个<code>Record</code>参数，看起来就清楚多了。</p>
+<p><strong>2)</strong>对象的类型应该符合名称，如果不匹配，就会容易理解不当。例如，这个例子展示了一个常见的错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)setURL:(NSString *)URL;  &#x2F;&#x2F; 错误的</span><br></pre></td></tr></table></figure>
+
+<p>这不正确是因为方法名为<code>setURL:</code>，它应该接收一个<code>NSURL</code>，而不是一个<code>NSString</code>。如果你需要一个string，你应该添加一些指示让它更清晰：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- (void)setURLString:(NSString *)string;</span><br><span class="line">- (void)setURL:(NSURL *)URL;</span><br></pre></td></tr></table></figure>
+
+<p>不过这个规则不应该过度使用，如果类型很明显，别添加类型信息到变量上。如果在项目中没有包含可能让阅读者困惑的<code>Name</code>类，一个叫做<code>name</code>的属性就比叫做<code>nameString</code>的属性会更好。</p>
+<p><strong>3)</strong>方法名也有与内存管理和KVC相关的特定原则。虽然ARC使得其中的一些规则不再重要，但在ARC与非ARC进行交互时（包括Apple框架的非ARC代码），不正确的方法命名仍会导致非常具有挑战性的错误。</p>
+<p>方法名应该永远是以小写字母开头的<code>驼峰结构</code>。</p>
+<p>如果一个方法名以<code>alloc</code>,<code>new</code>,<code>copy</code>或者<code>mutableCopy</code>开头，调用者拥有返回的对象。如果你的property的名字像<code>newRecord</code>这样，这个规则会导致一些问题。重新命名这个property为<code>nextRecord</code>或者其他名字。</p>
+<p>以<code>get</code>开头的方法应该返回一个参照值，例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)getPerson:(Person **)person;</span><br></pre></td></tr></table></figure>
+
+<p>不要使用<code>get</code>前缀作为property访问器的一部分，property <code>name</code>的getter应该是<code>-name</code>.</p>
+<h3 id="二、属性-Property-和实例变量-Ivar-的最佳实践"><a href="#二、属性-Property-和实例变量-Ivar-的最佳实践" class="headerlink" title="二、属性(Property)和实例变量(Ivar)的最佳实践"></a>二、属性(Property)和实例变量(Ivar)的最佳实践</h3><p>Property应该代表一个对象的状态,Getter应该没有外部影响（它们可以具有内部影响，例如caching，但这些应该是对调用者不可见的）。通常，它们应该直接有效的调用且不应该有所限制。<br>避免直接访问实例变量，用访问器来替代。我们会过一会讨论一些例外的情况，不过还是先说下为什么要用访问器来访问。<br>在ARC出现之前，引起bug最常见的问题就是直接访问实例变量。开发者没有正确的retain和release实例变量，它们的程序就会内存泄露或者崩溃。由于ARC自动管理retain和release，一些开发者认为这个规则已经不再重要，但还有其他使用访问器的原因：</p>
+<ul>
+<li><p><strong>KVO</strong> —- 也许使用访问器最关键的原因是property可以被观察到。如果不用访问器，你需要在每次修改property里的实例变量时调用<code>willChangeValueForKey:</code>和<code>didChangeValueForKey:</code>。而访问器会在需要时自动调用这些方法。</p>
+</li>
+<li><p><strong>其他作用</strong> —- 你或者你的子类可能在setter方法中添加一些其他的逻辑。比如发送通知Notifications或者注册事件到NSUndoManager中，你不应该忽视这些作用，除非它们不重要。类似地，你或者你的子类可能会对getter方法添加了缓存导致将不会再访问实例变量。</p>
+</li>
+<li><p><strong>惰性加载</strong> —- 如果一个property是惰性加载的，你应该使用访问器来确保它被正确的初始化。</p>
+</li>
+<li><p><strong>锁定</strong> —- 如果你在处理多线程代码时对property加锁了，直接访问实例变量会绕开加锁机制，而且很可能会造成崩溃。</p>
+</li>
+<li><p><strong>一致性</strong> —- 看了前面的内容，有人可能会说当我们需要操作property时应该只使用访问器，但这会使得代码很难维护。怀疑并解释每一个直接访问的实例变量，而不是不断地记住哪些变量需要用访问器，哪些不需要，这会使得代码更容易的审核，检查和维护。访问器，尤其是synthesized的访问器，已经在Objective-C里被高度优化，它们值得使用。</p>
+</li>
+</ul>
+<p>也就是说，你不应该在这几个地方使用访问器：</p>
+<ul>
+<li><p><strong>访问器内部</strong> —- 很明显，你不应该在访问器内部使用访问器自身。通常，你也不想在getter和setter内部使用它们自己（这可能会造成死循环），一个访问器应该访问它自身的实例变量。</p>
+</li>
+<li><p><strong>Dealloc</strong> —- ARC极大的简化了dealloc的使用，但它有时仍会出现。最好在dealloc里不调用外部对象，因为这个对象可能会处于有歧义的状态。它很可能会让观察者感到困惑，因为观察者会接收到好几次属性值要改变的通知，但其他是这个对象要被销毁了。</p>
+</li>
+<li><p><strong>初始化</strong> —- 跟dealloc类似，对象在初始化过程中也可能会处于不一致的状态，你不应该在这个期间内发送通知或者调用一些其他的逻辑。通常我们会在这里初始化readonly的变量(比如NSMutableArray)。这样，你可以初始化这个变量而不用将它声明为readwrite。</p>
+</li>
+</ul>
+<p>访问器在Objective-C中被高度优化，而且在可维护性和灵活性上有很重要的优点。一般上，对于所有属性甚至是你自己声明的，都应该使用访问器.</p>
+<h3 id="三、分类-Categories"><a href="#三、分类-Categories" class="headerlink" title="三、分类(Categories)"></a>三、分类(Categories)</h3><p>分类允许你在运行时为一个已存在的类添加方法，任何类，甚至是由Apple提供的Cocoa类，都可以通过分类来扩展，这些方法对这个类的所有实例都是可用的。声明一个分类很简单，它看起来如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@interface NSMutableString (PTLCapitalize)</span><br><span class="line">- (void)ptl_capitalize;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+
+<p><code>PTLCapitalize</code>是分类的名称，注意这里没有声明任何实例变量。分类不能声明实例变量，也不能合成属性（synthesize properties)。这个<code>PTLCapitalize</code>分类不要求必须在某处实现<code>ptl_capitalize</code>方法。如果<code>ptl_capitalize</code>方法没有实现但是有对象尝试调用它，系统会抛出异常，编译器不会在这里提供任何保护。如果要实现<code>ptl_capitalize</code>方法,那么它看起来如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@implementation NSMutableString (PTLCapitalize)</span><br><span class="line">- (void)ptl_capitalize &#123;</span><br><span class="line">	[self setString:[self capitalizedString]];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个在分类的implementation中定义，或者是这个分类的implementation必须跟分类的interface有同样的名字，并没有要求。但是，如果我们写了一个叫做<code>PTLCapitalize</code>的@implementation块，那么就必须实现叫做<code>PTLCapitalize</code>的@interface块中的所有的方法。</p>
+<p>从技术上说，分类可以覆盖(override)方法，但是这么做是很危险也是不推荐的。如果两个分类实现了相同的方法，哪个方法会被调用是不确定的。如果后来为了维护而把一个类分成categories，那么对方法的覆盖(override)可能会导致一些不确定的问题（一些蛋疼的难以查到的bug）。此外，利用这个特性会使得代码难以理解。分类的覆盖(overrides)也会导致没办法调用原来的方法。</p>
+<blockquote>
+<p>因为代码冲突的可能性，建议为分类方法添加一个前缀，然后是一个下划线，就像例子中的<code>ptl_capitalize</code>一样。Cocoa通常不这么用，但是在这个例子中，它比其他的方式更清晰。</p>
+</blockquote>
+<p>一种比较好的分类用法是对已存在的类添加方法，当我们这么做时，建议命名头文件和实现文件时用原来类的名称加上扩展的名称。比如，你可能会对<code>NSDate</code>创建一个简单的<code>PTLExtensions</code>分类:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">NSDate+PTLExtensions.h</span><br><span class="line">——————————————————————</span><br><span class="line">@interface NSDate (PTLExtensions)</span><br><span class="line">- (NSTimeInterval)ptl_timeIntervalUntilNow;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">NSDate+PTLExtensions.m</span><br><span class="line">——————————————————————</span><br><span class="line">@implementation NSDate (PTLExtensions)</span><br><span class="line">- (NSTimeInterval)ptl_timeIntervalUntilNow &#123;</span><br><span class="line">	return -[self timeIntervalSinceNow];</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+
+<p>如果你只添加几个实用的方法，建议你把他们放到一个分类文件，可以命名为<code>PTLExtensions</code>或者其他你想起的名称。这么做可以使得添加这些扩展类到每个工程时很方便。当然，这会造成代码膨胀，所以在向”utility”分类中添加方法时要注意数量，不要太多。Objective-C不能像C/C++那样有效的做到死代码剥离。</p>
+<h3 id="load"><a href="#load" class="headerlink" title="+load"></a>+load</h3><p>分类是在运行时附加到类上的，这可能定义分类为动态加载，所以分类可以很晚才被添加（虽然你不能在iOS里编写自己的动态库，但系统库包括分类都是动态加载的）。Objective-C提供了一个叫做<code>+load</code>的hook技术，可以在分类首次附加时运行。和<code>+initialize</code>一样,你可以使用它来实现分类具体的设定，比如初始化静态变量。你不能在分类中安全的使用<code>+initialize</code>,因为类可能已经实现它了。如果多个分类都实现了<code>initialize</code>，那个正在运行的是那个分类是不确定的.</p>
+<p>你可能会问：“如果分类不能用<code>+initialize</code>,因为它们可能与其他分类冲突，那么多个分类实现<code>+load</code>呢？”。这正是Objective-C runtime神奇的地方之一，<code>+load</code>方法是runtime的特例，每个分类都能实现它并且所有的实现都会运行。不过并不能确保执行的先后顺序，而且你不应该手动调用<code>+load</code>方法。</p>
+<p>不管分类是静态还是动态的加载<code>+load</code>都可以被调用，分类被添加到runtime时<code>+load</code>会被调用，这往往是程序加载的时候，在<code>main</code>之前，不过也可能更晚一些。</p>
+<p>类也可以有自己的<code>+load</code>方法（不在分类中定义的），它们被调用时也是在类被添加到runtime时。不过这很少用到，除非你是动态的加载类。</p>
+<p>你不用像防止<code>+initialize</code>多次运行那样来对待<code>+load</code>，<code>+load</code>消息只会发送给真正实现了它的类，所以你不会意外的从子类得到调用的消息，就像<code>+initialize</code>那样。每个<code>+load</code>方法只会调用一次，而且你不应该使用[super load]。</p>
+<h3 id="四、关联引用-Associative-References"><a href="#四、关联引用-Associative-References" class="headerlink" title="四、关联引用(Associative References)"></a>四、关联引用(Associative References)</h3><p>关联引用允许你附加key-value数据到任何对象上，这个能力有很多用途，但最常用的是允许分类的属性添加数据。<br>假设我们有个<code>Person</code>类，你想使用分类来添加一个叫<code>emailAddress</code>的新属性。也许你在其他程序中也使用<code>Person</code>类，并且有时需要使用<code>emailAddress</code>有时不需要，因此当你不需要时使用分类会是避免开销的好的解决办法。或者，你不拥有<code>Person</code>类，并且维护者不会为你添加property，你该怎么解决这个问题？首先，我们先看看基础的<code>Person</code>类:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">@interface Person : NSObject</span><br><span class="line">@property (nonatomic, readwrite, copy) NSString *name;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation Person</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+
+<p>现在，你可以在分类中用关联引用添加一个叫<code>emailAddress</code>的新属性：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#import &lt;objc&#x2F;runtime.h&gt;</span><br><span class="line">@interface Person (EmailAddress)</span><br><span class="line">@property (nonatomic, readwrite, copy) NSString *emailAddress;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation Person (EmailAddress)</span><br><span class="line"></span><br><span class="line">static char emailAddressKey;</span><br><span class="line">- (NSString *)emailAddress &#123;</span><br><span class="line">	return objc_getAssociatedObject(self, &amp;emailAddressKey);</span><br><span class="line">&#125;</span><br><span class="line">- (void)setEmailAddress:(NSString *)emailAddress &#123;</span><br><span class="line">	objc_setAssociatedObject(self, &amp;emailAddressKey,</span><br><span class="line">								  emailAddress,</span><br><span class="line">								  OBJC_ASSOCIATION_COPY);</span><br><span class="line">&#125; </span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+
+<p>注意关联引用是基于key的内存地址，而不是它的值。emailAddressKey里存储的是什么并不重要，它只需要有一个唯一的、不变的地址。这就是为什么它通常使用未分配的static char作为key。</p>
+<p>关联引用有很好的内存管理，根据传给<code>objc_setAssociatedObject</code>的参数正确的处理copy,assign或者retain。当相关的对象被销毁时它们会被release掉。这意味着你可以在另一个对象被销毁时，使用关联的对象进行追踪。例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">const char kWatcherKey;</span><br><span class="line"></span><br><span class="line">@interface Watcher : NSObject</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">#import &lt;objc&#x2F;runtime.h&gt;</span><br><span class="line"></span><br><span class="line">@implementation Watcher</span><br><span class="line">- (void)dealloc &#123;</span><br><span class="line">	NSLog(@&quot;HEY! The thing I was watching is going away!&quot;);</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">NSObject *something &#x3D; [NSObject new];</span><br><span class="line">objc_setAssociatedObject(something, &amp;kWatcherKey, </span><br><span class="line">							 [Watcher new],</span><br><span class="line">							 OBJC_ASSOCIATION_RETAIN);</span><br></pre></td></tr></table></figure>
+
+<p>这个技术对于调试很有用，同时也可以用在非调试任务，比如执行清理。</p>
+<p>使用关联引用是附加相关对象到alert panel或者controller的好方法.比如你附加一个“represented object”到alert panel，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">ViewController.m(AssocRef)</span><br><span class="line">——————————————————————————</span><br><span class="line">id interestingObject &#x3D; ...;</span><br><span class="line">UIAlertView *alert &#x3D; [[UIAlertView alloc] </span><br><span class="line">							initWithTitle:@&quot;Alert&quot; message:nil</span><br><span class="line">							delegate:self</span><br><span class="line">							cancelButtonTitle:@&quot;OK&quot;</span><br><span class="line">							otherButtonTitles:nil];</span><br><span class="line">objc_setAssociatedObject(alert, &amp;kRepresentedObject,</span><br><span class="line">							interestingObject,</span><br><span class="line">							OBJC_ASSOCIATION_RETAIN_NONATOMIC);</span><br><span class="line">[alert show];</span><br></pre></td></tr></table></figure>
+
+<p>现在，当alert panel要消失的时候，你可以获取到相关的内容:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">- (void)alertView:(UIAlertView *)alertView</span><br><span class="line">		 clickButtonAtIndex:(NSInteger)buttonIndex &#123;</span><br><span class="line">	UIButton *sender &#x3D; objc_getAssociatedObject(alertView,&amp;kRepresentedObject);</span><br><span class="line">	self.buttonLabel.text &#x3D; [[sender titleLabel] text];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>很多程序在调用里使用实例变量来处理，但关联引用更简洁。对于那些熟悉Mac的开发者，这些代码类似于<code>representedObject</code>,但却更加灵活。</p>
+<p>关联引用(或者其他为category添加数据的方式)的一个限制是它们没有与<code>encodeWithCoder:</code>整合，所以它们很难通过一个分类来序列化。</p>
+<h3 id="五、Weak-Collections"><a href="#五、Weak-Collections" class="headerlink" title="五、Weak Collections"></a>五、Weak Collections</h3><p>Cocoa集合中最常用的是<code>NSArray</code>,<code>NSSet</code>和<code>NSDictionary</code>,也是使用最多的，但是在某些情况下它们并不适用。<code>NSArray</code>和<code>NSSet</code>会持有你存储进去的对象，<code>NSDictionary</code>会持有你存储在里面的value同时拷贝对应的key。这些行为通常是你想要的，但对于某些情况它们并不适合。幸运的是，从iOS6开始我们可以使用其他的集合类：<code>NSPointerArray</code>,<code>NSHashTable</code>和<code>NSMapTable</code>。在Apple的文档中它们统称为指针集合类(pointer collection classes)，并且有时用<code>NSPointerFunctions</code>类来配置。</p>
+<p><code>NSPointerArray</code>类似于<code>NSArray</code>，<code>NSHashTable</code>类似于<code>NSSet</code>，而<code>NSMapTable</code>类似于<code>NSDictionary</code>。每个新的集合类都可以配置为保持弱引用，指向空对象或者其他异常情况。<code>NSPointerArray</code>的额外好处是它还可以存储NULL值，而在这<code>NSArray</code>是个常见的问题。</p>
+<p>指针集合类可以使用<code>NSPointerFunctions</code>来广泛的配置，但大多数情况下，它只是简单的传一个<code>NSPointerFunctionsOptions</code> flag到<code>-initWithOptions:</code>中。最常见的情况，比如<code>+weakObjectsPointerArray</code>,有它们自己的构造函数。</p>
+<h3 id="六、NSCache"><a href="#六、NSCache" class="headerlink" title="六、NSCache"></a>六、NSCache</h3><p>一个使用weak collection最常见的理由便是实现缓存。不过，大多数情况下我们可以使用Foundation的缓存对象<code>NSCache</code>来替代。大多数时，你可以像使用<code>NSDictionary</code>那样使用它，调用<code>objectForKey:</code>，<code>setObject:forKey:</code>和<code>removeObjectForKey:</code>方法即可。</p>
+<p>NSCache有几个被低估的特性，比如事实上它是线程安全的。你可以在任务无锁的线程中改变一个NSCache。NSCache也被设计来整合遵从了<NSDiscardableContent>的对象。</p>
+<p><NSDiscardableContent>最常见的类型就是<code>NSPurgeableData</code>。通过调用beginContentAccess和endContentAccess，你可以控制何时安全的废弃这个对象。这不仅在你的应用运行时提供自动缓存管理，它甚至在你的应用暂停时提供帮助。通常，当内存紧张时且内存警告没有释放出足够的内存，iOS会开始杀死暂停在后台的应用。在这种情况下，你的应用还没有得到delegate的消息就被杀死了。但是如果你使用NSPurgeableData，iOS会为你释放这块内存，甚至是应用被暂停了。</p>
+<p>想了解更多关于NSCache的信息，请参考Xcode的文档中的<NSDiscardableContent>和NSPurgeableData。</p>
+<h3 id="七、NSURLComponents"><a href="#七、NSURLComponents" class="headerlink" title="七、NSURLComponents"></a>七、NSURLComponents</h3><p>有时候Apple会低调的添加一些有趣的类。在iOS7里，Apple增加了<code>NSURLComponents</code>，但却没有相关的参考文档，但是你可以去NSURL.h里查看它。</p>
+<p><code>NSURLComponents</code>会让分离URL的各个部分变得容易，例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">NSString *URLString &#x3D; @&quot;http:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Special:Search?search&#x3D;ios&quot;;</span><br><span class="line">NSURLComponents *components &#x3D; [NSURLComponents componentsWithString:URLString];</span><br><span class="line">NSString *host &#x3D; components.host;</span><br></pre></td></tr></table></figure>
+
+<p>你也可以用<code>NSURLComponents</code>来组成或修改URL:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">components.host &#x3D; @&quot;es.wikipedia.org&quot;;</span><br><span class="line">NSURL *esURL &#x3D; [components URL];</span><br></pre></td></tr></table></figure>
+
+<p>在iOS7中，NSURL.h添加了几个在处理URL时有用的分类。比如：你可以使用[NSCharacterSet URLPathAllowedCharacterSet]来获取path中允许的字符集。NSURL.h还添加了[NSString stringByAddingPercentEncodingWithAllowedCharacters:]方法来让你控制哪些字符应该被percent-encoded。以前，你只可以用CoreFoundation中的CFURLCreateStringByReplacingPercentEscapes来处理。</p>
+<p>你可以查看官网文档中的NSURL.h来了解这些新方法。</p>
+<h3 id="八、CFStringTransform"><a href="#八、CFStringTransform" class="headerlink" title="八、CFStringTransform"></a>八、CFStringTransform</h3><p>CFStringTransform是个你很难相信自己以前竟然不知道它的函数。它可以以神奇的方式来音译字符串。例如，你可以使用kCFStringTransformStripCombiningMarks:选项来删除重音符号：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CFMutableStringRef string &#x3D; CFStringCreateMutableCopy(NULL, 0, CFSTR(&quot;Schläger&quot;));</span><br><span class="line">CFStringTransform(string, NULL, kCFStringTransformStripCombiningMarks,false);</span><br><span class="line">... &#x3D;&gt; string is now &quot;Schlager&quot;</span><br><span class="line">CFRelease(string);</span><br></pre></td></tr></table></figure>
+
+<p>当你在处理非拉丁文字系统时（例如中文和阿拉伯语），CFStringTransform功能更强大。它可以转换许多书写系统为拉丁字母，使得标准化更加简单。例如，你可以转换中文字母为拉丁字母：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CFMutableStringRef string &#x3D; CFStringCreateMutableCopy(NULL, 0, CFSTR(&quot;你好&quot;));</span><br><span class="line">CFStringTransform(string, NULL, kCFStringTransformToLatin, false);</span><br><span class="line">...&#x3D;&gt; string is now &quot;nˇı hˇao&quot;</span><br><span class="line">CFStringTransform(string, NULL, kCFStringTransformStripCombiningMarks, false);</span><br><span class="line">...&#x3D;&gt; string is now &quot;ni hao&quot;</span><br><span class="line">CFRelease(string);</span><br></pre></td></tr></table></figure>
+
+<p>注意只需要简单的将option设置为kCFStringTransformToLatin即可，而不用管被转换的语言是什么。CFStringTransform也可以将拉丁字母转换为其他书写系统，比如阿拉伯语，韩文，希伯来语和泰语。<br>如果你想了解更多的信息，可以在developer.apple.com上查看CFMutableString和CFStringTokenizer的相关内容。</p>
+<h3 id="九、instancetype"><a href="#九、instancetype" class="headerlink" title="九、instancetype"></a>九、instancetype</h3><p>Objective-C早就有一些微妙的子类化问题，比如下面这样的情况：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@interface Foo : NSObject</span><br><span class="line">+ (Foo *)fooWithInt:(int)x;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@interface SpecialFoo : Foo</span><br><span class="line">@end</span><br><span class="line">...</span><br><span class="line">SpecialFoo *sf &#x3D; [SpecialFoo fooWithInt:1];</span><br></pre></td></tr></table></figure>
+
+<p>这段代码会产生一个警告:”Incompatible pointer types initializing ‘SpecialFoo *’ with an expression of type ‘Foo *’”。问题在于fooWithInt返回一个Foo对象，而编译器不知道返回的类型是一个更具体的类（SpecialFoo）。这种情况很常见,比如[NSMutableArray array]，编译器不会在你需要把值赋给NSMutableArray而它却返回一个NSArray的时候不生成警告。</p>
+<p>有几种解决这个问题的方案。</p>
+<p><strong>方案一：</strong>你可能会重载fooWithInt：，如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@interface SpecialFoo : Foo</span><br><span class="line">+ (SpecialFoo *)fooWithInt:(int)x;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation SpecialFoo</span><br><span class="line">+ (SpecialFoo *)fooWithInt:(int)x &#123;</span><br><span class="line">	return (SpecialFoo *)[super fooWithInt:x];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这种方法虽然能解决问题，但很不方便，你得为了添加类型转换重载很多方法。</p>
+<p><strong>方案二：</strong>你也可以在调用的时候进行类型转换:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SpecialFoo *sf &#x3D; (SpecialFoo *)[SpecialFoo fooWithInt:1];</span><br></pre></td></tr></table></figure>
+
+<p>这种方法会更有效，不过它对于调用者很不方便。加入大量的类型转换也会消除类型检查，因此它更容易出错。</p>
+<p><strong>方案三：</strong>最常见的解决方法是返回id类型：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@interface Foo : NSObject</span><br><span class="line">+ (id)fooWithInt:(int)x;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@interface SpecialFoo : Foo</span><br><span class="line">@end</span><br><span class="line">...</span><br><span class="line">SpecialFoo *sf &#x3D; [SpecialFoo fooWithInt:1];</span><br></pre></td></tr></table></figure>
+
+<p>这种方法相当方便，而且消除了类型检查的警告。这是上面三种方案中最好用的，这也就是为什么Cocoa中大量的构造函数都返回id类型。</p>
+<p>Cocoa有着极其一致的命名惯例。任何以init开头的方法都应该返回那种类型的对象，难道编译器不能强制这样做吗？答案是yes，最新版本的Clang编译器就是这么做的。所以现在，如果你有一个叫做initWithFoo：的方法返回了id类型，编译器假设返回类型是这个对象真正的类，如果你的类型不匹配它会给出警告。</p>
+<p>对于init方法来讲这个自动转换很强大，但是这个例子中是一个便利的构造器fooWithInt：。在这个问题上编译器也能解决吗？答案也是yes，不过它不是自动的。对于便利构造器的命名转换不如init方法那么有效，SpecialFoo可能还有一个叫+fooWithInt:specialThing:的便利构造器。编译器没有好的办法从命名上找出是不是应该返回SpecialFoo类型，所以它不会这么去做。事实上，Clang添加了一种叫instancetype的新类型。作为返回类型，instancetype表示了它真正的类。所以，新的解决方案来了。</p>
+<p><strong>方案四：</strong>你可以像这样声明你的方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@interface Foo : NSObject</span><br><span class="line">+ (instancetype)fooWithInt:(int)x;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@interface SpecialFoo : Foo</span><br><span class="line">@end</span><br><span class="line">...</span><br><span class="line">SpecialFoo *sf &#x3D; [SpecialFoo fooWithInt:1];</span><br></pre></td></tr></table></figure>
+
+<p>为了保持一致性，最好使用instancetype作为init方法和便利构造器的返回类型。</p>
+<h3 id="十、Base64-and-Percent-Encoding"><a href="#十、Base64-and-Percent-Encoding" class="headerlink" title="十、Base64 and Percent Encoding"></a>十、Base64 and Percent Encoding</h3><p>Cocoa早就需要方便的使用Base64编码和解码。Base64是很多web的标准协议，而且在很多情况下很有用，比如你需要存储任意的data到一个字符串的时候。</p>
+<p>在iOS7中，新的NSData方法比如initWithBase64EncodedString:options:和base64EncodedStringWithOptions:可以用来在Base64和NSData间相互转换。</p>
+<p>percent编码在web协议中也很重要，特别是URL。你现在可以使用[NSString stringByRemovingPercentEncoding]来解码percent编码过的字符串。尽管已经有了stringByAddingPercentEscapesUsingEncoding:方法来进行percent编码，iOS7还是添加了stringByAddingPercentEncodingWithAllowedCharacters:方法来允许你控制哪些字符要被percent编码。</p>
+<h3 id="十一、-NSArray-firstObject"><a href="#十一、-NSArray-firstObject" class="headerlink" title="十一、-[NSArray firstObject]"></a>十一、-[NSArray firstObject]</h3><p>这是一个小改变，但我还是要提到它，因为我们等待它很久了：多年来，很多开发者实现自己的分类来获取数组的首个对象，现在Apple终于添加了firstObject方法，就像lastObject一样，如果数组是空的，firstObject会返回nil，而不是像使用objectAtIndex:0那样崩溃。</p>
+<h3 id="十二、Summary"><a href="#十二、Summary" class="headerlink" title="十二、Summary"></a>十二、Summary</h3><p>Cocoa有很长的历史，充满了传统和惯例。Cocoa也是一个发展的、活跃的框架。在这个章节里面，你已经学到一些数十年里Objective-C开发的最佳实践。你学会了怎么为类，方法和变量更好的命名；学到了怎么更好的用一些并不熟知的特性，比如关联引用(associative references)和NSURLComponents。即使是对于有经验的Objective-C开发者，仍希望你学到了一些之前并不知道的Cocoa技巧。</p>
+<h3 id="十三、更多阅读"><a href="#十三、更多阅读" class="headerlink" title="十三、更多阅读"></a>十三、更多阅读</h3><p>1.官方文档：下面的内容的相关文档可以在developer.apple.com或者在Xcode文档找到</p>
+<ul>
+<li>CFMutableString Reference</li>
+<li>CFStringTokenizer Reference</li>
+<li>Collections Programming Topics</li>
+<li>Collections Programming Topics,”Pointer Function Options”</li>
+<li>Programming with Objective-C</li>
+</ul>
+<p>2.其他资源</p>
+<ul>
+<li>马特·汤普森的博客，每周更新:nshipster.com</li>
+<li>如果你需要处理日文,这是一个非常有用的分类，用来处理复杂的书写系统:<a href="https://github.com/00StevenG/NSString-Japanese" target="_blank" rel="noopener">https://github.com/00StevenG/NSString-Japanese</a></li>
+</ul>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#iOS" >
+    <span class="tag-code">iOS</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- 打赏 START -->
+    
+      <div class="money-like">
+        <div class="reward-btn">
+          赏
+          <span class="money-code">
+            <span class="alipay-code">
+              <div class="code-image"></div>
+              <b>使用支付宝打赏</b>
+            </span>
+            <span class="wechat-code">
+              <div class="code-image"></div>
+              <b>使用微信打赏</b>
+            </span>
+          </span>
+        </div>
+        <p class="notice">若你觉得我的文章对你有帮助，欢迎点击上方按钮对我打赏</p>
+      </div>
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    <div class="qrcode">
+      <canvas id="share-qrcode"></canvas>
+      <p class="notice">扫描二维码，分享此文章</p>
+    </div>
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://yoursite.com/2014/11/25/yi-ni-ke-neng-bu-zhi-dao-de-objective-cji-qiao/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+     // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+        
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+
+    // gitment
+    var gitmentConfig = "cocoa-chen";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "(译)你可能不知道的Objective-C技巧",
+        owner: "cocoa-chen",
+        repo: "cocoa-chen.github.io",
+        oauth: {
+          client_id: "e12c4d16bb2a811822a7",
+          client_secret: "8fa9d6ce27d985bc1ed6027ee666305208a5e86e"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  })();
+</script>
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2020 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>
